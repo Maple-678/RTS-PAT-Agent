@@ -47,15 +47,18 @@ client_code = OpenAI(
 def get_LLM_answers(question, context, history):
     if question:
         try:
-            # Get model response (DeepSeek-V3 as planning LLM)
+            # Get model response (DeepSeek-V4-Flash with thinking)
             completion = client.chat.completions.create(
-                model="deepseek-chat",
+                model="deepseek-v4-flash",
                 messages=[
                     {
                         "role": "user",
                         "content": question
                     }
-                ]
+                ],
+                extra_body={
+                    "thinking": {"type": "enabled"}
+                }
             )
             answer = completion.choices[0].message.content
             
@@ -493,10 +496,10 @@ def _get_most_relevant_rag_example_basic(instruction, rag_database_path='./datab
         return {"nl": "", "code": ""}
 
 def _get_claude_code_completion(prompt_text, history_file_path):
-    """Code generation using DeepSeek API (replaces Claude)"""
+    """Code generation using DeepSeek-V4-Flash"""
     try:
         response = client_code.chat.completions.create(
-            model="deepseek-chat",
+            model="deepseek-v4-flash",
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt_text}]
         )
@@ -667,6 +670,7 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
     
     # Setup directories
     root_path = "c:/Users/njr/Desktop/PAT-Agent-master"
+    pat_exe_path = "C:/Program Files/Process Analysis Toolkit/Process Analysis Toolkit 3.5.1/PAT3.Console.exe"
     
     if is_refine:
         # If we're refining, create a specific subdirectory for this round
@@ -716,7 +720,7 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
             continue
         
         # Choose the appropriate command based on the assertion type
-        pat_exe = f"{root_path}/PAT.Console/Process-Analysis-Toolkit/PAT3.Console.exe"
+        pat_exe = pat_exe_path
         if ('reaches' in block) or ('deadlockfree' in block):
             command = [pat_exe, "-csp", "-engine", "1", input_file, output_file]
         else:
@@ -994,7 +998,7 @@ if __name__ == '__main__':
     with open('./PAT.json', 'r') as file:
         structured_data_list = json.load(file)
         # assert len(structured_data_list) == 6, "The number of entries in the JSON file should be 6."
-        for i in range(min(1, len(structured_data_list))): # Iterate through all entries in the JSON
+        for i in range(len(structured_data_list)): # Run all entries
         # for i in range(1):
             current_structured_data = structured_data_list[i]
             print(f"Processing data entry {i} with model name: {current_structured_data.get('modelName', 'N/A')}")
