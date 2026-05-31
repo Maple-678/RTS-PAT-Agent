@@ -1,0 +1,25 @@
+{
+    "const-var-time": {
+        "runTime": 5.6348826999999995
+    },
+    "action-time": {
+        "runTime": 13.670225700000001
+    },
+    "nl-annotation-time": {
+        "runTime": 15.543807500000003
+    },
+    "codegen-time_2026-05-28-20-33-54": {
+        "runTime": 9.4811573
+    },
+    "codegen-time_2026-05-28-20-34-04": {
+        "runTime": 9.858954599999997
+    },
+    "codegen-time_2026-05-28-20-34-14": {
+        "runTime": 9.444582599999997
+    },
+    "verification-time_2026-05-28-20-34-14": {
+        "runTime": 0.4887597000000028,
+        "hasMismatch": true,
+        "codegenFailed": true
+    }
+}

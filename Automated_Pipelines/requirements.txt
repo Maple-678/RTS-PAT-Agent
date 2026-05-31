@@ -1,0 +1,9 @@
+# PAT-Agent core dependencies (Windows compatible)
+# Install with: pip install -r requirements.txt
+
+anthropic>=0.51.0
+openai>=1.77.0
+flask>=3.0.3
+flask-cors>=4.0.1
+scikit-learn>=1.3.2
+sentence-transformers>=3.2.1

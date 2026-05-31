@@ -1,0 +1,20 @@
+[
+  {
+    "assertion": "#assert South() reaches goal;",
+    "trace": "<init>",
+    "current_result": "",
+    "desired_result": "Valid"
+  },
+  {
+    "assertion": "#assert South() reaches goal with min(elapsedTime);",
+    "trace": "<init>",
+    "current_result": "",
+    "desired_result": "Valid"
+  },
+  {
+    "assertion": "#assert South() |= [] alter;",
+    "trace": "<init>",
+    "current_result": "",
+    "desired_result": "Invalid"
+  }
+]
