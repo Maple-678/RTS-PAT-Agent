@@ -1,0 +1,20 @@
+#define GATE_UP 0;
+#define GATE_DOWN 1;
+#define TRAIN_STATE_APPROACHING 0;
+#define TRAIN_STATE_WAITING 1;
+#define TRAIN_STATE_CROSSING 2;
+#define TRAIN_STATE_DEPARTED 3;
+#define GATE_LOWER_DURATION 2;
+
+var trainState = TRAIN_STATE_APPROACHING;
+var gateState = GATE_UP;
+var gateTimer = 0;
+
+Train() = approach{trainState = TRAIN_STATE_APPROACHING;} -> ifb(gateState == GATE_DOWN) { cross{trainState = TRAIN_STATE_CROSSING;} -> leave{trainState = TRAIN_STATE_DEPARTED;} -> Train(); };
+
+Controller() = ifb(trainState == TRAIN_STATE_APPROACHING) { (lower_gate{gateState = GATE_DOWN;} -> Wait[GATE_LOWER_DURATION]; raise_gate{gateState = GATE_UP;} -> Controller()) within[2]; } else { tick -> Controller(); };
+
+System() = Train() ||| Controller();
+
+#define safe !(trainState == TRAIN_STATE_CROSSING && gateState == GATE_UP);
+#assert System() deadlockfree;

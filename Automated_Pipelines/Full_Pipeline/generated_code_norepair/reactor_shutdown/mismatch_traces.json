@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert reactor_shutdown() deadlockfree;",
+    "trace": "<init -> overheat -> \u03c4 -> \u03c4 -> tock -> tock -> tock -> [timeout[0]] -> emergency_shutdown -> \u03c4>",
+    "current_result": "Invalid",
+    "desired_result": "Valid",
+    "pat_error": "The Assertion (reactor_shutdown() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> \u03c4 -> \u03c4 -> tock -> tock -> tock -> [timeout[0]] -> emergency_shutdown -> \u03c4>"
+  }
+]

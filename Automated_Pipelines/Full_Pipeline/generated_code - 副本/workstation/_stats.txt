@@ -1,0 +1,38 @@
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:15
+Total Transitions:23
+Time Used:0.0363076s
+Estimated Memory Used:8618.2KB
+
+
+=======================================================
+Assertion: System() reaches alert_raised
+********Verification Result********
+The Assertion (System() reaches alert_raised) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> alert -> τ>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:5
+Total Transitions:4
+Time Used:0.0199791s
+Estimated Memory Used:8661.2KB
+
+

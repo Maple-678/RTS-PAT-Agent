@@ -1,0 +1,31 @@
+#define TIMEOUT_LIMIT 10;
+#define WELDING_IDLE 0;
+#define WELDING_ACTIVE 1;
+#define WELDING_COMPLETE 2;
+#define WELDING_TIMEOUT 3;
+var weldingStatus = WELDING_IDLE;
+
+RobotArm() = 
+  startWeld{weldingStatus = WELDING_ACTIVE;} -> 
+  ( 
+    (Wait[5]; finishWeld{weldingStatus = WELDING_COMPLETE;} -> Stop) 
+    [] 
+    (Wait[15]; finishWeld{weldingStatus = WELDING_COMPLETE;} -> Stop) 
+  ) 
+  timeout[TIMEOUT_LIMIT] 
+  (timeoutOccurred{weldingStatus = WELDING_TIMEOUT;} -> 
+    resetWeld{weldingStatus = WELDING_IDLE;} -> RobotArm()
+  );
+
+Controller() = 
+  ifb (weldingStatus == WELDING_TIMEOUT) 
+  { 
+    alertEvent -> resetWeld{weldingStatus = WELDING_IDLE;} -> Controller() 
+  };
+
+System() = RobotArm() ||| Controller();
+
+#define alert_raised (weldingStatus == WELDING_TIMEOUT);
+
+#assert System() deadlockfree;
+#assert System() reaches alert_raised;

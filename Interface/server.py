@@ -44,15 +44,18 @@ def get_planning_model_answers():
 
     if question:
         try:
-            # Get model response (DeepSeek)
+            # Get model response (DeepSeek-V4-Pro with thinking)
             completion = client.chat.completions.create(
-                model="deepseek-chat",
+                model="deepseek-v4-flash",
                 messages=[
                     {
                         "role": "user",
                         "content": question
                     }
-                ]
+                ],
+                extra_body={
+                    "thinking": {"type": "enabled"}
+                }
             )
             answer = completion.choices[0].message.content
             
@@ -118,15 +121,18 @@ def get_chatbot_model_answers():
 
     if question:
         try:
-            # Get model response (DeepSeek)
+            # Get model response (DeepSeek-V4-Flash with thinking)
             completion = client.chat.completions.create(
-                model="deepseek-chat",
+                model="deepseek-v4-flash",
                 messages=[
                     {
                         "role": "user",
                         "content": question
                     }
-                ]
+                ],
+                extra_body={
+                    "thinking": {"type": "enabled"}
+                }
             )
             answer = completion.choices[0].message.content
             
@@ -209,7 +215,7 @@ def get_code_model_answers_claude():
         try:
             # Get model response (DeepSeek for code generation)
             response = client.chat.completions.create(
-                model="deepseek-chat",
+                model="deepseek-v4-flash",
                 max_tokens=8192,
                 messages=[
                     {
@@ -345,7 +351,7 @@ def GPT4_output(input, context=None):
     ])
 
     completion = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-v4-flash",
         messages=messages
     )
     return completion.choices[0].message.content
@@ -1297,9 +1303,9 @@ def add_to_database_algorithm(new_entry):
         json.dump(data, f, indent=2)
 
 def call_claude_model(prompt):
-    """Get description from DeepSeek (replaces Claude)"""
+    """Get description from DeepSeek-V4-Pro (replaces Claude)"""
     response = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-v4-flash",
         max_tokens=1024,
         messages=[
             {
@@ -1311,9 +1317,9 @@ def call_claude_model(prompt):
     return response.choices[0].message.content
 
 def call_gpt_o3_model(prompt):
-    """Get ID/name from DeepSeek (replaces o3-mini)"""
+    """Get ID/name from DeepSeek-V4-Pro (replaces o3-mini)"""
     completion = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-v4-flash",
         messages=[
             {
                 "role": "user",

@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert parking_meter deadlockfree;",
+    "patResult": "The Assertion (parking_meter() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> pay -> \u03c4>",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert parking_meter reaches violation_issued;",
+    "patResult": "The Assertion (parking_meter() reaches violation_issued) is NOT valid.",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Valid"
+  }
+]

@@ -1,0 +1,19 @@
+var id_set = -1;
+
+#define Delta 3;
+#define Epsilon 5;
+
+Set(i) = set_var{i}{id_set = i;} -> Wait[Delta];
+Check(i) = ifb(id_set == i) { enter_cs{i} -> exit_cs{i} -> Set(i); }
+           [] else { wait_retry{i} -> Wait[Epsilon]; Set(i); };
+
+Process(i) = Set(i); Check(i);
+
+System = Process(0) ||| Process(1) ||| Process(2) ||| Process(3);
+
+#define mutex (entered0 + entered1 + entered2 + entered3 <= 1);
+#define entered0 (false);
+#define entered1 (false);
+#define entered2 (false);
+#define entered3 (false);
+#assert System |= []<> (enter_cs.0 || enter_cs.1 || enter_cs.2 || enter_cs.3);

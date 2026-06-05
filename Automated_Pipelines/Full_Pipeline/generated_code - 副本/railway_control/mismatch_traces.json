@@ -1,0 +1,16 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "trace": "<init>",
+    "current_result": "",
+    "desired_result": "Valid",
+    "pat_error": "Verification result not found - potential syntax error"
+  },
+  {
+    "assertion": "#assert System() |= []safe;",
+    "trace": "<init>",
+    "current_result": "",
+    "desired_result": "Valid",
+    "pat_error": "Verification result not found - potential syntax error"
+  }
+]

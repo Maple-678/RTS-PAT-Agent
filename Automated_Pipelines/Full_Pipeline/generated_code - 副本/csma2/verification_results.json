@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() |= []no_collision;",
+    "patResult": "The Assertion (System() |= [] no_collision) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

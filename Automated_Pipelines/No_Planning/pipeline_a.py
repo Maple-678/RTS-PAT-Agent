@@ -184,10 +184,10 @@ def _get_most_relevant_rag_example_basic(instruction, rag_database_path='./datab
         return {"nl": "", "code": ""}
 
 def _get_claude_code_completion(prompt_text, history_file_path):
-    """Code generation using DeepSeek API (replaces Claude)"""
+    """Code generation using DeepSeek-V4-Pro (replaces Claude)"""
     try:
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model="deepseek-v4-pro",
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt_text}]
         )

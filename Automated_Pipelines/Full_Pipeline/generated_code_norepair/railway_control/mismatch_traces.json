@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert System() |= [] safe;",
+    "trace": "<init -> elapse -> tock -> [Wait[0]] -> approach -> lower -> [ifb((gate == GATE_DOWN))] -> tock -> [Wait[0]] -> tock -> [Wait[0]] -> raise -> lower -> tock -> cross -> [Wait[0]] -> tock -> [Wait[0]] -> raise>",
+    "current_result": "Invalid",
+    "desired_result": "Valid",
+    "pat_error": "The Assertion (System() |= [] safe) is NOT valid.\nA counterexample is presented as follows.\n<init -> elapse -> tock -> [Wait[0]] -> approach -> lower -> [ifb((gate == GATE_DOWN))] -> tock -> [Wait[0]] -> tock -> [Wait[0]] -> raise -> lower -> tock -> cross -> [Wait[0]] -> tock -> [Wait[0]] -> raise>"
+  }
+]

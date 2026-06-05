@@ -1,0 +1,85 @@
+{
+    "codegen-time_2026-06-03-19-40-53": {
+        "runTime": 35.785826899999996
+    },
+    "verification-time_2026-06-03-19-40-54": {
+        "runTime": 1.2559703000000013,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round1_2026-06-03-19-41-18": {
+        "runTime": 23.824946500000003
+    },
+    "verification-time_2026-06-03-19-41-18": {
+        "runTime": 0.37250380000000405,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "refine-time_round2_2026-06-03-19-41-57": {
+        "runTime": 38.40485120000001
+    },
+    "verification-time_2026-06-03-19-41-57": {
+        "runTime": 0.38374070000000415,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "refine-time_round3_2026-06-03-19-42-56": {
+        "runTime": 58.880485199999995
+    },
+    "verification-time_2026-06-03-19-42-56": {
+        "runTime": 0.3708732999999995,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-19-43-52": {
+        "runTime": 55.682121600000016
+    },
+    "verification-time_2026-06-03-19-43-53": {
+        "runTime": 1.2464668000000074,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round1_2026-06-03-19-44-14": {
+        "runTime": 21.213929199999995
+    },
+    "verification-time_2026-06-03-19-44-16": {
+        "runTime": 1.2439934999999878,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round2_2026-06-03-19-45-28": {
+        "runTime": 72.37638219999997
+    },
+    "refine-time_round3_2026-06-03-19-46-25": {
+        "runTime": 57.47195110000001
+    },
+    "verification-time_2026-06-03-19-46-27": {
+        "runTime": 1.2820186999999805,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-40-16": {
+        "runTime": 24.963663099999998
+    },
+    "verification-time_2026-06-03-21-40-17": {
+        "runTime": 1.4026792000000015,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-40-47": {
+        "runTime": 29.5651069
+    },
+    "verification-time_2026-06-03-21-40-48": {
+        "runTime": 1.3333968999999968,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-41-19": {
+        "runTime": 30.57622289999999
+    },
+    "verification-time_2026-06-03-21-41-20": {
+        "runTime": 1.3658338000000043,
+        "hasMismatch": true,
+        "codegenFailed": false
+    }
+}

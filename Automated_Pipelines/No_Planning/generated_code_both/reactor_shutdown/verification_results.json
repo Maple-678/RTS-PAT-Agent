@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> tock -> tock -> tock -> [timeout[0]] -> emergency_shutdown -> emergency_shutdown>",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System reaches shutdown_done;",
+    "patResult": "The Assertion (System() reaches shutdown_done) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> overheat -> tock -> tock -> tock -> [timeout[0]] -> emergency_shutdown>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

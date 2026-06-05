@@ -1,0 +1,2 @@
+Light() = on -> Wait[3]; off -> Wait[3]; Light();
+#assert Light() deadlockfree;

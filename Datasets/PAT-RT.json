@@ -1,0 +1,753 @@
+[
+  {
+    "index": 1,
+    "modelName": "heartbeat_monitor",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "A sender emits heartbeat periodically every 2 time units. A monitor raises alarm if no heartbeat is received within 5 time units.",
+    "interactionMode": "none",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "heartbeat interval is 2 time units",
+        "type": "periodic",
+        "bound": 2
+      },
+      {
+        "description": "alarm triggers if heartbeat absent for 5 time units",
+        "type": "timeout",
+        "bound": 5
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Sender",
+        "description": "Sends heartbeat signal every 2 time units."
+      },
+      {
+        "name": "Monitor",
+        "description": "Waits for heartbeat and triggers alarm on timeout."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "reachability",
+        "component": "",
+        "stateName": "alarm_state",
+        "reachabilityType": "customize",
+        "customDescription": "alarm state is reachable when no heartbeat for 5 time units",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 2,
+    "modelName": "light_blinker",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "A light blinks on and off. It stays on for 3 time units, then turns off for 3 time units, cycling continuously.",
+    "interactionMode": "skip",
+    "subsystemCount": 1,
+    "timeConstraints": [
+      {
+        "description": "each on/off phase lasts 3 time units",
+        "type": "duration",
+        "bound": 3
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Light",
+        "description": "A light that toggles between on and off every 3 time units."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 3,
+    "modelName": "coffee_brew",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "A coffee machine takes 4 time units to brew coffee. If brewing takes longer than 6 time units, a cleanup cycle is triggered.",
+    "interactionMode": "none",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "normal brewing duration is 4 time units",
+        "type": "duration",
+        "bound": 4
+      },
+      {
+        "description": "cleanup triggers if brewing exceeds 6 time units",
+        "type": "timeout",
+        "bound": 6
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "CoffeeMaker",
+        "description": "Brews coffee. If done within time, dispenses coffee. Otherwise triggers cleanup."
+      },
+      {
+        "name": "Timer",
+        "description": "Monitors brewing duration and signals timeout at 6 time units."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "reachability",
+        "component": "",
+        "stateName": "cleanup_done",
+        "reachabilityType": "customize",
+        "customDescription": "cleanup state is reachable after timeout",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 4,
+    "modelName": "pedestrian_light",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "A pedestrian walk signal shows WALK for 4 time units then changes to DONT_WALK for 8 time units, cycling continuously.",
+    "interactionMode": "skip",
+    "subsystemCount": 1,
+    "timeConstraints": [
+      {
+        "description": "walk signal duration is 4 time units",
+        "type": "duration",
+        "bound": 4
+      },
+      {
+        "description": "dont_walk signal duration is 8 time units",
+        "type": "duration",
+        "bound": 8
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Crosswalk",
+        "description": "Cycles between WALK and DONT_WALK states with timed intervals."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "ltl",
+        "component": "",
+        "stateName": "",
+        "reachabilityType": "state",
+        "customDescription": "Define state walk_on to represent the WALK signal is active. Assert it is always the case that eventually walk_on.",
+        "editingFinished": true,
+        "assertionTruth": "Valid",
+        "ltlTarget": "customize"
+      }
+    ]
+  },
+  {
+    "index": 5,
+    "modelName": "traffic_light",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "A three-phase traffic light: GREEN for 10 time units, YELLOW for 3 time units, RED for 10 time units, then back to GREEN.",
+    "interactionMode": "skip",
+    "subsystemCount": 1,
+    "timeConstraints": [
+      {
+        "description": "green phase lasts 10 time units",
+        "type": "duration",
+        "bound": 10
+      },
+      {
+        "description": "yellow phase lasts 3 time units",
+        "type": "duration",
+        "bound": 3
+      },
+      {
+        "description": "red phase lasts 10 time units",
+        "type": "duration",
+        "bound": 10
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Light",
+        "description": "Cycles through GREEN, YELLOW, RED phases with respective timed durations."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "ltl",
+        "component": "",
+        "stateName": "",
+        "reachabilityType": "state",
+        "customDescription": "Define state green_active to represent the GREEN signal is on. Assert it is always the case that eventually green_active.",
+        "editingFinished": true,
+        "assertionTruth": "Valid",
+        "ltlTarget": "customize"
+      }
+    ]
+  },
+  {
+    "index": 6,
+    "modelName": "parking_meter",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "A parking meter accepts payment for 5 time units of parking. After payment, the meter counts down and expires, at which point a violation timer starts with a 2 time unit grace period.",
+    "interactionMode": "none",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "paid parking duration is 5 time units",
+        "type": "duration",
+        "bound": 5
+      },
+      {
+        "description": "grace period after expiry is 2 time units",
+        "type": "grace",
+        "bound": 2
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Meter",
+        "description": "Accepts payment, counts down parking time, then expires."
+      },
+      {
+        "name": "Enforcement",
+        "description": "Monitors meter status and issues violation after grace period."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "reachability",
+        "component": "",
+        "stateName": "violation_issued",
+        "reachabilityType": "customize",
+        "customDescription": "violation is issued after meter expires and grace period passes",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 7,
+    "modelName": "atm_timeout",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "An ATM session: after card insertion, the user must input PIN within 8 time units. If timeout occurs, the card is ejected and the session ends.",
+    "interactionMode": "none",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "PIN input must complete within 8 time units",
+        "type": "deadline",
+        "bound": 8
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "ATM",
+        "description": "Accepts card, waits for PIN, processes transaction or ejects card on timeout."
+      },
+      {
+        "name": "User",
+        "description": "Inserts card and provides PIN (may delay beyond timeout)."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "reachability",
+        "component": "",
+        "stateName": "card_ejected",
+        "reachabilityType": "customize",
+        "customDescription": "card is ejected on PIN timeout",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 8,
+    "modelName": "elevator_door",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "An elevator door opens for 8 time units, then closes automatically. If someone presses the reopen button while closing, the door reopens.",
+    "interactionMode": "none",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "door stays open for 8 time units before closing",
+        "type": "duration",
+        "bound": 8
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Door",
+        "description": "Door opens, stays open for 8 time units, then closes."
+      },
+      {
+        "name": "Button",
+        "description": "Reopen button press that interrupts the closing sequence."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 9,
+    "modelName": "reactor_shutdown",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "A reactor temperature monitor: when temperature exceeds threshold, the cooling system must activate within 3 time units. If cooling fails, emergency shutdown occurs within 5 time units.",
+    "interactionMode": "none",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "cooling must activate within 3 time units of overheat",
+        "type": "deadline",
+        "bound": 3
+      },
+      {
+        "description": "emergency shutdown within 5 time units if cooling fails",
+        "type": "deadline",
+        "bound": 5
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Reactor",
+        "description": "Operates normally or overheats. Accepts cooling signal to return to normal."
+      },
+      {
+        "name": "SafetyMonitor",
+        "description": "Detects overheat, attempts cooling, triggers emergency shutdown if cooling fails."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "reachability",
+        "component": "",
+        "stateName": "shutdown_done",
+        "reachabilityType": "customize",
+        "customDescription": "emergency shutdown is reachable when cooling fails",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 10,
+    "modelName": "workstation",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "An assembly workstation: a robot arm must complete its welding task within 10 time units. If the deadline is missed, an alert is raised and the arm resets.",
+    "interactionMode": "none",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "welding must complete within 10 time units",
+        "type": "deadline",
+        "bound": 10
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "RobotArm",
+        "description": "Starts welding, must finish within 10 time units or triggers timeout."
+      },
+      {
+        "name": "Controller",
+        "description": "Monitors welding progress, raises alert on timeout, initiates reset."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "reachability",
+        "component": "",
+        "stateName": "alert_raised",
+        "reachabilityType": "customize",
+        "customDescription": "alert is reachable when welding times out",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 11,
+    "modelName": "fischer_protocol",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "Fischer's mutual exclusion protocol: 4 processes compete for a shared resource. Each process sets a shared variable to its id, then waits Delta time units. If the variable still equals its id after the wait, it enters the critical section. Delta = 3, Epsilon = 5.",
+    "interactionMode": "interleaving",
+    "subsystemCount": 4,
+    "timeConstraints": [
+      {
+        "description": "Delta = 3 time units: max delay between write of id and read-back check",
+        "type": "duration",
+        "bound": 3
+      },
+      {
+        "description": "Epsilon = 5 time units: wait time before re-checking if variable changed",
+        "type": "duration",
+        "bound": 5
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Process0",
+        "description": "Process with id 0: sets shared var to 0, waits Delta, enters CS if var still 0."
+      },
+      {
+        "name": "Process1",
+        "description": "Process with id 1: sets shared var to 1, waits Delta, enters CS if var still 1."
+      },
+      {
+        "name": "Process2",
+        "description": "Process with id 2: sets shared var to 2, waits Delta, enters CS if var still 2."
+      },
+      {
+        "name": "Process3",
+        "description": "Process with id 3: sets shared var to 3, waits Delta, enters CS if var still 3."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "ltl",
+        "component": "",
+        "stateName": "",
+        "reachabilityType": "state",
+        "customDescription": "Define state mutex where at most one process is in critical section (counter <= 1). Assert it is always the case that mutex holds.",
+        "editingFinished": true,
+        "assertionTruth": "Valid",
+        "ltlTarget": "customize"
+      },
+      {
+        "assertionType": "ltl",
+        "component": "",
+        "stateName": "",
+        "reachabilityType": "state",
+        "customDescription": "Define state progress0 where eventually process 0 enters critical section. Assert it is always the case that eventually progress0.",
+        "editingFinished": true,
+        "assertionTruth": "Invalid",
+        "ltlTarget": "customize"
+      }
+    ]
+  },
+  {
+    "index": 12,
+    "modelName": "csma2",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "CSMA/CD protocol: 2 nodes share a channel. Each node listens, if idle transmits 3 ticks, else backs off. Node0 backoff=2, Node1 backoff=4. Only one transmits at a time.",
+    "interactionMode": "interleaving",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "transmission takes 3 time units",
+        "type": "duration",
+        "bound": 3
+      },
+      {
+        "description": "Node0 backoff is 2 ticks",
+        "type": "duration",
+        "bound": 2
+      },
+      {
+        "description": "Node1 backoff is 4 ticks",
+        "type": "duration",
+        "bound": 4
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Node0",
+        "description": "Node 0: listens, if idle transmits 3 ticks. If busy backs off 2 ticks."
+      },
+      {
+        "name": "Node1",
+        "description": "Node 1: listens, if idle transmits 3 ticks. If busy backs off 4 ticks."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "editingFinished": true,
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "ltl",
+        "component": "",
+        "stateName": "",
+        "reachabilityType": "state",
+        "customDescription": "Define state no_collision where at most one node holds the channel (medium == TX0 or medium == TX1). Assert it is always the case that no_collision holds.",
+        "editingFinished": true,
+        "assertionTruth": "Valid",
+        "ltlTarget": "customize"
+      }
+    ]
+  },
+  {
+    "index": 13,
+    "modelName": "railway_control",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "Railway: train approaches bridge, controller lowers gate. Train must not cross while gate is up. Controller lowers gate within 2 ticks after approach.",
+    "interactionMode": "interleaving",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "gate lowered within 2 ticks after approach",
+        "type": "duration",
+        "bound": 2
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Train",
+        "description": "Train approaches bridge, waits for gate, crosses, then leaves."
+      },
+      {
+        "name": "Controller",
+        "description": "Detects approaching train, lowers gate for 2 ticks, then raises."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "ltl",
+        "component": "",
+        "customDescription": "Define state safe where train never crosses while gate is up. Assert safe always holds.",
+        "assertionTruth": "Valid",
+        "ltlTarget": "customize"
+      }
+    ]
+  },
+  {
+    "index": 14,
+    "modelName": "pacemaker",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "Pacemaker: heart beats every 5 ticks. If heart stops, pacemaker detects within 2 ticks and delivers pacing pulse.",
+    "interactionMode": "interleaving",
+    "subsystemCount": 2,
+    "timeConstraints": [
+      {
+        "description": "heart beats every 5 ticks",
+        "type": "period",
+        "bound": 5
+      },
+      {
+        "description": "pacemaker responds within 2 ticks",
+        "type": "duration",
+        "bound": 2
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Heart",
+        "description": "Heart beats naturally every 5 time units."
+      },
+      {
+        "name": "Pacemaker",
+        "description": "Monitors heartbeat. If heart stops, delivers pace within 2 ticks."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "ltl",
+        "component": "",
+        "customDescription": "Define pacing_ok where heart always eventually beats. Assert pacing_ok holds.",
+        "assertionTruth": "Valid",
+        "ltlTarget": "customize"
+      }
+    ]
+  },
+  {
+    "index": 15,
+    "modelName": "fddi",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "FDDI token ring: 2 stations, token passes between them. Sync messages take 2 ticks. Station A sends async when time permits.",
+    "interactionMode": "interleaving",
+    "subsystemCount": 3,
+    "timeConstraints": [
+      {
+        "description": "sync message takes 2 ticks",
+        "type": "duration",
+        "bound": 2
+      },
+      {
+        "description": "async message takes 1 tick",
+        "type": "duration",
+        "bound": 1
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Ring",
+        "description": "Passes token between Station A and Station B."
+      },
+      {
+        "name": "StationA",
+        "description": "Sends sync (2 ticks) and async messages (1 tick)."
+      },
+      {
+        "name": "StationB",
+        "description": "Sends sync messages (2 ticks)."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "reachability",
+        "component": "",
+        "stateName": "async_done",
+        "conditions": [
+          {
+            "variable": "async_sent",
+            "value": "true"
+          }
+        ],
+        "assertionTruth": "Valid"
+      }
+    ]
+  },
+  {
+    "index": 16,
+    "modelName": "lift_system",
+    "modelType": "timed",
+    "targetModule": "rts",
+    "modelDesc": "Lift: 2-floor building, door opens 3 ticks. Lift moves 2 ticks when button pressed. Door and lift operate concurrently.",
+    "interactionMode": "interleaving",
+    "subsystemCount": 3,
+    "timeConstraints": [
+      {
+        "description": "door open lasts 3 time units",
+        "type": "duration",
+        "bound": 3
+      },
+      {
+        "description": "floor travel takes 2 time units",
+        "type": "duration",
+        "bound": 2
+      }
+    ],
+    "subsystems": [
+      {
+        "name": "Door",
+        "description": "Door opens for 3 ticks then closes. Repeats."
+      },
+      {
+        "name": "LiftCar",
+        "description": "Moves between floors in 2 ticks when button pressed."
+      },
+      {
+        "name": "Button",
+        "description": "Button can be pressed anytime to call the lift."
+      }
+    ],
+    "assertions": [
+      {
+        "assertionType": "deadlock-free",
+        "component": "",
+        "assertionTruth": "Valid"
+      },
+      {
+        "assertionType": "reachability",
+        "component": "",
+        "stateName": "at_floor2",
+        "conditions": [
+          {
+            "variable": "lift_floor",
+            "value": "FLOOR2"
+          }
+        ],
+        "assertionTruth": "Valid"
+      }
+    ]
+  }
+]

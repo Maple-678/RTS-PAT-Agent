@@ -1,0 +1,20 @@
+=======================================================
+Assertion: coffee_brew() deadlockfree
+********Verification Result********
+The Assertion (coffee_brew() deadlockfree) is NOT valid.
+The following trace leads to a deadlock situation.
+<init -> start_brew -> tock -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> start_brew -> tock -> tock -> tock -> tock -> timeout_event -> [Wait[0]] -> tock -> tock -> [timeout[0]] -> timeout_event -> cleanup>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:24
+Total Transitions:32
+Time Used:0.0285985s
+Estimated Memory Used:8718.544KB
+
+

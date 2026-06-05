@@ -1,0 +1,16 @@
+#define WALK 1;
+#define DONT_WALK 0;
+#define WALK_TIME 4;
+#define DONT_WALK_TIME 8;
+#define walk_on (crosswalkState == WALK);
+
+var crosswalkState = DONT_WALK;
+
+Crosswalk() = set{crosswalkState = WALK;} -> Wait[WALK_TIME];
+              set{crosswalkState = DONT_WALK;} -> Wait[DONT_WALK_TIME];
+              Crosswalk();
+
+System() = Crosswalk();
+
+#assert System() deadlockfree;
+#assert System() |= []<>walk_on;

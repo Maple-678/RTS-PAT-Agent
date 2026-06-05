@@ -1,0 +1,38 @@
+[
+  {
+    "nl": "// Sender emits heartbeat periodically with a timeout guard. // Monitor can timeout if no heartbeat arrives, triggering alarm event which sets a flag. // assert system deadlock free. // assert alarm state is reachable via flag variable.",
+    "code": "var alarm_on = false;\nSender() = heartbeat -> Sender();\nMonitor() = (heartbeat -> Monitor()) timeout[5] (alarm{alarm_on = true;} -> Monitor());\nSystem() = Sender() ||| Monitor();\n#define alarm_reached (alarm_on == true);\n#assert System() deadlockfree;\n#assert System() reaches alarm_reached;"
+  },
+  {
+    "nl": "// Process sets a shared variable, waits Delta time units via tick then Wait, then checks the variable with a guarded choice in a helper sub-process. // CRITICAL: after Wait[n] use semicolon then call a helper process — do NOT chain Wait[n] -> directly. Data operations need a tick before Wait.",
+    "code": "var x = -1;\n\nP() = set{x = 0;} -> tick -> Wait[3];\n      Check();\n\nCheck() = [x == 0] enter -> exit{x = -1;} -> P()\n          [] [x != 0] retry -> tick -> Wait[5];\n          P();\n\nSystem() = P();\n#define goal (x == 0);\n#assert System() deadlockfree;\n#assert System() reaches goal;"
+  },
+  {
+    "nl": "// Task must finish within 4 time units, otherwise fallback executes. // assert system deadlock free.",
+    "code": "Task() = start -> work -> done -> Stop;\nFallback() = timeout_event -> Stop;\nSystem() = (Task() within[4]) [] (Task() timeout[4] Fallback());\n#assert System() deadlockfree;"
+  },
+  {
+    "nl": "// Light turns on, stays on for a bounded time, then turns off. // assert system deadlock free.",
+    "code": "Light() = on -> off -> Light();\nTimedLight() = (Light() within[3]) deadline[10];\n#assert TimedLight() deadlockfree;"
+  },
+  {
+    "nl": "// Traffic light cycles through green, yellow, red phases with defined durations. // Use Wait[n] for timing with semicolons between phases. // Data operation {phase = N;} -> tick -> Wait[duration]; next_phase -> ... // assert deadlock free and green always eventually occurs (LTL liveness).",
+    "code": "#define GREEN_DURATION 10;\n#define YELLOW_DURATION 3;\n#define RED_DURATION 10;\n\nvar phase = 0;\n\nLight() = green_phase{phase = 0;} -> tick -> Wait[GREEN_DURATION];\n          yellow_phase{phase = 1;} -> tick -> Wait[YELLOW_DURATION];\n          red_phase{phase = 2;} -> tick -> Wait[RED_DURATION];\n          Light();\n\n#define green_active (phase == 0);\nSystem = Light();\n#assert System deadlockfree;\n#assert System |= []<>green_active;"
+  },
+  {
+    "nl": "// Elevator door opens for 8 time units, then starts closing. // If button pressed during closing, door reopens. // Use tick -> Wait[n]; helper_process pattern. // Guarded [buttonPressed] vs [!buttonPressed] selects close or reopen. // assert deadlock free.",
+    "code": "#define OPEN_DURATION 8;\n\nvar doorState = 0;\nvar buttonPressed = false;\n\nDoor() = open{doorState = 1;} -> tick -> Wait[OPEN_DURATION];\n         closing{doorState = 2;} -> CheckClose();\n\nCheckClose() = [buttonPressed] reopen{doorState = 1; buttonPressed = false;} -> tick -> Wait[OPEN_DURATION]; closing{doorState = 2;} -> CheckClose()\n               [] [!buttonPressed] close{doorState = 0;} -> Door();\n\nButton() = press{buttonPressed = true;} -> Button() [] tick -> Button();\n\nSystem = Door() ||| Button();\n#assert System deadlockfree;"
+  },
+  {
+    "nl": "// Two nodes share a channel with carrier sensing. // Each listens, if idle transmits 3 ticks then releases. // If busy backs off (2 ticks for Node0, 4 for Node1). // Guarded choice [medium == IDLE] vs [medium != IDLE]. // Different backoff times break symmetry. // assert deadlock free.",
+    "code": "#define IDLE 0;\n#define TX0 1;\n#define TX1 2;\n\nvar medium = IDLE;\n\nNode0() = ready0 -> listen0 -> ([medium == IDLE] start_tx0{medium = TX0;} -> tick -> tick -> tick -> finish_tx0{medium = IDLE;} -> Node0() [] [medium != IDLE] backoff0 -> tick -> tick -> Node0());\n\nNode1() = ready1 -> listen1 -> ([medium == IDLE] start_tx1{medium = TX1;} -> tick -> tick -> tick -> finish_tx1{medium = IDLE;} -> Node1() [] [medium != IDLE] backoff1 -> tick -> tick -> tick -> tick -> Node1());\n\nSystem() = Node0() ||| Node1();\n#assert System() deadlockfree;"
+  },
+  {
+    "nl": "// Fischer protocol with 4 processes sharing a variable for mutual exclusion. // Each sets x=i, waits 3 ticks, checks if x==i to enter CS. // If x changed, retries. // Guarded [x == Idle] for write, [x == i] for CS entry. // assert deadlock free and mutex (counter <= 1) always holds.",
+    "code": "#define N 4;\n#define Delta 3;\n#define Idle -1;\n\nvar x = Idle;\nvar counter = 0;\n\nP(i) = [x == Idle] set_x_i{x = i;} -> tick -> tick -> tick ->\n       ([x == i] enter_cs_i{counter = counter + 1;} ->\n         exit_cs_i{counter = counter - 1; x = Idle;} -> P(i)\n        [] [x != i] P(i));\n\nFischer = ||| i:{0..N-1} @ P(i);\n\n#define mutex_ok (counter <= 1);\n#assert Fischer deadlockfree;\n#assert Fischer |= [] mutex_ok;"
+  },
+  {
+    "nl": "Fischer protocol (OFFICIAL PAT RTS manual pattern). Uses ifb blocking conditional, Wait[Epsilon] within[Delta]. assert deadlockfree + mutex (counter <= 1 always).",
+    "code": "#define N 4;\n#define Delta 3;\n#define Epsilon 4;\n#define Idle -1;\n\nvar x = Idle;\nvar counter = 0;\n\nP(i) = ifb(x == Idle) {\n  ((update_i{x = i;} -> Wait[Epsilon]) within[Delta]);\n  if(x == i) {\n    cs_i{counter = counter + 1;} -> exit_i{counter = counter - 1; x = Idle;} -> P(i)\n  } else {\n    P(i)\n  }\n};\n\nFischer = ||| i:{0..N-1} @ P(i);\n\n#define mutex counter <= 1;\n#assert Fischer deadlockfree;\n#assert Fischer |= [] mutex;"
+  }
+]

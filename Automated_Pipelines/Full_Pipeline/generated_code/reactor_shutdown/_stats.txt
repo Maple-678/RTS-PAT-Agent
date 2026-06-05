@@ -1,0 +1,38 @@
+=======================================================
+Assertion: reactor_shutdown() deadlockfree
+********Verification Result********
+The Assertion (reactor_shutdown() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:52
+Total Transitions:140
+Time Used:0.0356563s
+Estimated Memory Used:9052.376KB
+
+
+=======================================================
+Assertion: reactor_shutdown() reaches shutdown_done
+********Verification Result********
+The Assertion (reactor_shutdown() reaches shutdown_done) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> overheat -> tick -> tick -> tick -> emergency_shutdown -> cooling_attempt -> cooling_fail -> emergency_shutdown>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:23
+Total Transitions:31
+Time Used:0.0135993s
+Estimated Memory Used:8751.312KB
+
+

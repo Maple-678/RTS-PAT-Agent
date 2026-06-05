@@ -1,0 +1,8 @@
+[
+  {
+    "assertion": "#assert Light() deadlockfree;",
+    "patResult": "The Assertion (Light() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

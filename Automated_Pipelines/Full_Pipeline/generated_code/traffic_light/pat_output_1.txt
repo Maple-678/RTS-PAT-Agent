@@ -1,0 +1,17 @@
+=======================================================
+Assertion: System() |= []<> green_active
+********Verification Result********
+The Assertion (System() |= []<> green_active) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search with Zone Abstraction
+
+
+********Verification Statistics********
+Visited States:16
+Total Transitions:21
+Time Used:0.0374296s
+Estimated Memory Used:41271.92KB
+
+

@@ -1,0 +1,28 @@
+#define GATE_UP 0;
+#define GATE_DOWN 1;
+#define TRAIN_FAR 0;
+#define TRAIN_NEAR 1;
+#define TRAIN_ON_BRIDGE 2;
+#define TRAIN_PAST 3;
+
+var gate = GATE_UP;
+var train = TRAIN_FAR;
+
+Train() = 
+  [train == TRAIN_FAR] approach{train = TRAIN_NEAR;} ->
+  ifb(gate == GATE_DOWN) {
+    cross{train = TRAIN_ON_BRIDGE;} ->
+    leave{train = TRAIN_PAST;} ->
+    reset{train = TRAIN_FAR;} -> Train()
+  };
+
+Controller() = 
+  [train == TRAIN_NEAR && gate == GATE_UP] lower{gate = GATE_DOWN;} ->
+    Wait[1]; Wait[1];
+    raise{gate = GATE_UP;} -> Controller()
+  [] [train != TRAIN_NEAR || gate == GATE_DOWN] elapse -> Wait[1]; Controller();
+
+System() = Train() ||| Controller();
+
+#define safe !(train == TRAIN_ON_BRIDGE && gate == GATE_UP);
+#assert System() deadlockfree;

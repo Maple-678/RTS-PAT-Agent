@@ -1,0 +1,11 @@
+#define HEARTBEAT_INTERVAL 2;
+#define TIMEOUT_THRESHOLD 5;
+var alarm_on = false;
+
+Sender() = heartbeat -> Wait[HEARTBEAT_INTERVAL]; Sender();
+Monitor() = (heartbeat -> Monitor()) timeout[TIMEOUT_THRESHOLD] (alarm{alarm_on = true;} -> Stop);
+
+System() = Sender() ||| Monitor();
+
+#define alarm_state (alarm_on == true);
+#assert System() reaches alarm_state;

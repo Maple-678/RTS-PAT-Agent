@@ -1,0 +1,5 @@
+var state = 0;
+Crosswalk() = walk -> Wait[4]; dont_walk -> Wait[8]; Crosswalk();
+System() = Crosswalk();
+#assert System deadlockfree;
+#assert System |= []<>walk;

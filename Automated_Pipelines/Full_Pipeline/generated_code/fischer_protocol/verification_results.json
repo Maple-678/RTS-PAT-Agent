@@ -1,0 +1,20 @@
+[
+  {
+    "assertion": "#assert System deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> set_i -> set_i -> set_i -> set_i -> tick -> tock -> tock -> tock -> [Wait[0]] -> [Wait[0]] -> [Wait[0]] -> [Wait[0]] -> enterCS_i -> exitCS_i -> set_i>",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System |= []safe;",
+    "patResult": "The Assertion (System() |= [] safe) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System |= []<>progress0;",
+    "patResult": "The Assertion (System() |= []<> progress0) is NOT valid.\nA counterexample is presented as follows.\n<init -> set_i -> set_i -> set_i -> set_i -> tick -> tock -> tock -> tock -> [Wait[0]] -> [Wait[0]] -> [Wait[0]] -> enterCS_i -> exitCS_i -> set_i -> [Wait[0]]>",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Invalid"
+  }
+]

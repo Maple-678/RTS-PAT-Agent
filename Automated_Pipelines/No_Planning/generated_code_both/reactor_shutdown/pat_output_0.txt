@@ -1,0 +1,20 @@
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is NOT valid.
+The following trace leads to a deadlock situation.
+<init -> overheat -> tock -> tock -> tock -> [timeout[0]] -> emergency_shutdown -> emergency_shutdown>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:26
+Total Transitions:34
+Time Used:0.0341666s
+Estimated Memory Used:8710.352KB
+
+

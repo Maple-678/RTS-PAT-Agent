@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert reactor_shutdown() deadlockfree;",
+    "patResult": "The Assertion (reactor_shutdown() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert reactor_shutdown() reaches shutdown_done;",
+    "patResult": "The Assertion (reactor_shutdown() reaches shutdown_done) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> overheat -> tick -> tick -> tick -> emergency_shutdown -> cooling_attempt -> cooling_fail -> emergency_shutdown>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

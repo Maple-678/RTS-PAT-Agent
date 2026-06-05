@@ -1,0 +1,15 @@
+#define NORM 0;
+#define OVER 1;
+#define SHUT 3;
+var state = NORM;
+#define shutdown_done (state == SHUT);
+
+Reactor() = [state == NORM] overheat{state = OVER;} -> Reactor()
+          [] [state == OVER] activate_cooling{state = NORM;} -> Reactor()
+          [] [state == OVER] emergency_shutdown{state = SHUT;} -> Stop;
+
+Monitor() = overheat{state = OVER;} -> (activate_cooling{state = NORM;} -> Monitor() timeout[3] (emergency_shutdown{state = SHUT;} -> Stop within[5]));
+
+System() = Reactor() || Monitor();
+
+#assert System reaches shutdown_done;

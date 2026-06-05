@@ -1,0 +1,18 @@
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:85
+Total Transitions:246
+Time Used:0.0270903s
+Estimated Memory Used:8823KB
+
+

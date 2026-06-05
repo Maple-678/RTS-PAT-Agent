@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() reaches async_completed;",
+    "patResult": "The Assertion (System() reaches async_completed) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> [ifb((token_holder == 0))] -> tock -> [Wait[0]] -> send_asyncA -> tock -> [Wait[0]] -> async_doneA -> τ>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

@@ -1,0 +1,19 @@
+#define PARKING_DURATION 5;
+#define GRACE_PERIOD 2;
+
+var meter_expired = 0;
+var violation_flag = 0;
+
+Meter() = pay{meter_expired = 0;} -> Wait[PARKING_DURATION];
+          expire{meter_expired = 1;} -> Meter();
+
+Enforcement() = ifb(meter_expired == 1) {
+    Wait[GRACE_PERIOD];
+    violation_issued{violation_flag = 1; meter_expired = 0;} -> Enforcement()
+};
+
+System() = Meter() ||| Enforcement();
+
+#define goal (violation_flag == 1);
+#assert System() deadlockfree;
+#assert System() reaches goal;

@@ -1,0 +1,15 @@
+#define GREEN_DURATION 10;
+#define YELLOW_DURATION 3;
+#define RED_DURATION 10;
+
+var phase = 0;
+
+Light() = set_green{phase = 0;} -> tick -> Wait[GREEN_DURATION];
+          set_yellow{phase = 1;} -> tick -> Wait[YELLOW_DURATION];
+          set_red{phase = 2;} -> tick -> Wait[RED_DURATION];
+          Light();
+
+#define green_active (phase == 0);
+System = Light();
+
+#assert System deadlockfree;

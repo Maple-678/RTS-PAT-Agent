@@ -1,0 +1,11 @@
+enum {FLOOR1, FLOOR2};
+var lift_floor = FLOOR1;
+
+Door() = open_door -> Wait[3]; close_door -> Door();
+LiftCar() = [lift_floor==FLOOR1] press -> move_up -> Wait[2]; set_lift_floor{FLOOR2;} -> LiftCar()
+          [] [lift_floor==FLOOR2] press -> move_down -> Wait[2]; set_lift_floor{FLOOR1;} -> LiftCar();
+Button() = press -> Button();
+System() = Door() ||| LiftCar() ||| Button();
+
+#define at_floor2 (lift_floor == FLOOR2);
+#assert System() deadlockfree;

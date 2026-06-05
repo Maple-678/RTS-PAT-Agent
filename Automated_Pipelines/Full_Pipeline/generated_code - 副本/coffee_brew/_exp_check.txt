@@ -1,0 +1,38 @@
+=======================================================
+Assertion: coffee_brew() deadlockfree
+********Verification Result********
+The Assertion (coffee_brew() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:56
+Total Transitions:149
+Time Used:0.0353242s
+Estimated Memory Used:8913.112KB
+
+
+=======================================================
+Assertion: coffee_brew() reaches cleanup_done
+********Verification Result********
+The Assertion (coffee_brew() reaches cleanup_done) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> start_brew -> tock -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> start_brew -> tock -> tock -> tock -> tock -> [Wait[0]] -> tock -> tock -> [timeout[0]] -> timeout_event -> start_brew -> timeout_event>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:16
+Total Transitions:19
+Time Used:0.0234676s
+Estimated Memory Used:8710.352KB
+
+

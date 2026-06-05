@@ -1,0 +1,40 @@
+#define REACTOR_NORMAL 0;
+#define REACTOR_OVERHEATED 1;
+#define COOLING_NOT_ATTEMPTED 0;
+#define COOLING_ATTEMPTED 1;
+#define COOLING_SUCCESS 2;
+#define COOLING_FAILURE 3;
+#define SHUTDOWN_INACTIVE 4;
+#define SHUTDOWN_ACTIVE 5;
+
+var reactorState = 0;
+var coolingStatus = 0;
+var shutdownStatus = 4;
+
+Reactor() = overheat{reactorState = REACTOR_OVERHEATED;} -> Overheated()
+            [] tick -> Reactor();
+
+Overheated() = cooling_success -> Reactor()
+               [] emergency_shutdown -> Done()
+               [] tick -> Overheated();
+
+SafetyMonitor() = [reactorState == REACTOR_NORMAL] tick -> SafetyMonitor()
+                 [] [reactorState == REACTOR_OVERHEATED] StartCooling(0);
+
+StartCooling(t) = [t < 3 && reactorState == REACTOR_OVERHEATED] cooling_attempt{coolingStatus = COOLING_ATTEMPTED;} -> AfterAttempt()
+                  [] [t < 3 && reactorState == REACTOR_OVERHEATED] tick -> StartCooling(t+1)
+                  [] [t == 3 && reactorState == REACTOR_OVERHEATED] cooling_attempt{coolingStatus = COOLING_ATTEMPTED;} -> AfterAttempt();
+
+AfterAttempt() = cooling_success{coolingStatus = COOLING_SUCCESS; reactorState = REACTOR_NORMAL;} -> SafetyMonitor()
+                 [] cooling_fail{coolingStatus = COOLING_FAILURE;} -> StartShutdown(0);
+
+StartShutdown(t) = [t < 5 && shutdownStatus == SHUTDOWN_INACTIVE] emergency_shutdown{shutdownStatus = SHUTDOWN_ACTIVE;} -> Done()
+                   [] [t < 5 && shutdownStatus == SHUTDOWN_INACTIVE] tick -> StartShutdown(t+1)
+                   [] [t == 5 && shutdownStatus == SHUTDOWN_INACTIVE] emergency_shutdown{shutdownStatus = SHUTDOWN_ACTIVE;} -> Done();
+
+Done() = tick -> Done();
+
+reactor_shutdown() = Reactor() || SafetyMonitor();
+
+#define shutdown_done (shutdownStatus == SHUTDOWN_ACTIVE);
+#assert reactor_shutdown() deadlockfree;

@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System reaches async_done;",
+    "patResult": "The Assertion (System() reaches async_done) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> start_async_a>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

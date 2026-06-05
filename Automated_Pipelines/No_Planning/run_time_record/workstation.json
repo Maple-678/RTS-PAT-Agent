@@ -1,0 +1,42 @@
+{
+    "codegen-time_2026-06-03-19-46-51": {
+        "runTime": 20.477868899999997
+    },
+    "verification-time_2026-06-03-19-46-52": {
+        "runTime": 1.2410786999999992,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round1_2026-06-03-19-47-13": {
+        "runTime": 21.187018600000002
+    },
+    "verification-time_2026-06-03-19-47-15": {
+        "runTime": 1.280745599999996,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-41-58": {
+        "runTime": 33.2639146
+    },
+    "verification-time_2026-06-03-21-41-59": {
+        "runTime": 1.0206019000000026,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-21-42-34": {
+        "runTime": 35.87559340000001
+    },
+    "verification-time_2026-06-03-21-42-35": {
+        "runTime": 0.6694344999999942,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-21-43-02": {
+        "runTime": 26.8587658
+    },
+    "verification-time_2026-06-03-21-43-03": {
+        "runTime": 1.1754928000000007,
+        "hasMismatch": true,
+        "codegenFailed": false
+    }
+}

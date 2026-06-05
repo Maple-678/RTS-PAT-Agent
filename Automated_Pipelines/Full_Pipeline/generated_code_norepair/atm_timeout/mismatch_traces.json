@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert atm_timeout deadlockfree;",
+    "trace": "<init -> insert_card -> \u03c4 -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> tock -> tock -> [Wait[0]] -> timeout_occurs -> \u03c4 -> eject_card -> \u03c4>",
+    "current_result": "Invalid",
+    "desired_result": "Valid",
+    "pat_error": "The Assertion (atm_timeout() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> insert_card -> \u03c4 -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> tock -> tock -> [Wait[0]] -> timeout_occurs -> \u03c4 -> eject_card -> \u03c4>"
+  }
+]

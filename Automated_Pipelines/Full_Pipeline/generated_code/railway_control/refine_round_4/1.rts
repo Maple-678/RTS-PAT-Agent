@@ -1,0 +1,22 @@
+enum { TRAIN_FAR, TRAIN_APPROACHING, TRAIN_WAITING, TRAIN_CROSSING, TRAIN_LEFT, GATE_UP, GATE_DOWN, TIMER_0, TIMER_1, TIMER_2 };
+
+var trainPosition = TRAIN_FAR;
+var gateState = GATE_UP;
+var gateTimer = TIMER_0;
+
+Train() = train_approach{trainPosition = TRAIN_APPROACHING;} -> train_wait{trainPosition = TRAIN_WAITING;} -> WaitForGate();
+
+WaitForGate() = [gateState == GATE_DOWN] train_cross{trainPosition = TRAIN_CROSSING;} -> train_leave{trainPosition = TRAIN_LEFT;} -> train_far{trainPosition = TRAIN_FAR;} -> Train() [] Wait[1]; WaitForGate();
+
+Controller() = 
+    ifb (trainPosition == TRAIN_APPROACHING) {
+        gate_lower{gateState = GATE_DOWN; gateTimer = TIMER_2;} -> Wait[1]; gate_tick1{gateTimer = TIMER_1;} -> Wait[1]; gate_tick0{gateTimer = TIMER_0;} -> 
+        ifb (trainPosition == TRAIN_LEFT) {
+            gate_raise{gateState = GATE_UP;} -> Controller()
+        }
+    };
+
+System() = Train() ||| Controller();
+
+#define safe !(trainPosition == TRAIN_CROSSING && gateState == GATE_UP);
+#assert System() |= []safe;

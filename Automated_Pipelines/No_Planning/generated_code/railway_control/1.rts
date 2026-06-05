@@ -1,0 +1,24 @@
+#define gate_up (gate == 0)
+#define gate_down (gate == 1)
+#define train_idle (train_state == 0)
+#define train_approaching (train_state == 1)
+#define train_crossing (train_state == 2)
+#define train_leaving (train_state == 3)
+#define safe (train_state != 2 || gate != 0)
+
+var gate = 0;
+var train_state = 0;
+
+Train() = approach{train_state = 1;} -> Wait[1];
+          [gate == 1] cross{train_state = 2;} -> Wait[2];
+          leave{train_state = 3;} -> Wait[1];
+          Train();
+
+Controller() = approach{skip;} -> lower_gate{gate = 1;} -> Wait[2];
+               raise_gate{gate = 0;} -> Wait[1];
+               Controller();
+
+System() = Train() ||| Controller();
+
+#define goal safe;
+#assert System() |= []safe;

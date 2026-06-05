@@ -1,0 +1,20 @@
+=======================================================
+Assertion: reactor_shutdown() deadlockfree
+********Verification Result********
+The Assertion (reactor_shutdown() deadlockfree) is NOT valid.
+The following trace leads to a deadlock situation.
+<init -> overheat -> τ -> τ -> tock -> tock -> tock -> [timeout[0]] -> emergency_shutdown -> τ>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:9
+Total Transitions:11
+Time Used:0.0395076s
+Estimated Memory Used:8677.584KB
+
+

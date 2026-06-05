@@ -1,0 +1,32 @@
+#define OPEN_DURATION 3;
+#define DOOR_CLOSED 0;
+#define DOOR_OPEN 1;
+#define BUTTON_NOT_PRESSED 0;
+#define BUTTON_PRESSED 1;
+#define MOVE_DURATION 2;
+#define GROUND_FLOOR 0;
+#define FIRST_FLOOR 1;
+#define LIFT_IDLE 0;
+#define LIFT_MOVING 1;
+#define FLOOR2 1;
+
+var doorState = 0;
+var buttonState = 0;
+var liftState = 0;
+var currentFloor = 0;
+
+Door() = open{doorState = DOOR_OPEN;} -> Wait[OPEN_DURATION]; close{doorState = DOOR_CLOSED;} -> Door();
+
+LiftCar() = ifb(buttonState == BUTTON_PRESSED) {
+    start_move{liftState = LIFT_MOVING;} -> Wait[MOVE_DURATION];
+    arrive{currentFloor = (currentFloor == GROUND_FLOOR ? FIRST_FLOOR : GROUND_FLOOR);
+           liftState = LIFT_IDLE;
+           buttonState = BUTTON_NOT_PRESSED;} -> LiftCar();
+};
+
+Button() = press{buttonState = BUTTON_PRESSED;} -> Button();
+
+lift_system = Door() ||| LiftCar() ||| Button();
+
+#define at_floor2 (currentFloor == FLOOR2);
+#assert lift_system deadlockfree;

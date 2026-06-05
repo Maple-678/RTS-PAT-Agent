@@ -1,0 +1,16 @@
+#define DELTA 3;
+#define EPSILON 5;
+var sharedVar = 0;
+var counter = 0;
+var entered0 = false;
+
+Process(i) = set_i{sharedVar = i;} -> Wait[DELTA]; Check(i);
+
+Check(i) = [sharedVar == i] enterCS_i{counter = counter + 1; if (i == 0) entered0 = true;} -> exitCS_i{counter = counter - 1; sharedVar = 0;} -> Process(i)
+           [] [sharedVar != i] retry_i -> Wait[EPSILON]; Process(i);
+
+System = || i:{0..3} @ Process(i);
+
+#define safe (counter <= 1);
+#define progress0 (entered0 == true);
+#assert System |= []safe;

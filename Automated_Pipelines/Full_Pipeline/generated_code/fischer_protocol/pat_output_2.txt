@@ -1,0 +1,19 @@
+=======================================================
+Assertion: System() |= []<> progress0
+********Verification Result********
+The Assertion (System() |= []<> progress0) is NOT valid.
+A counterexample is presented as follows.
+<init -> set_i -> set_i -> set_i -> set_i -> tick -> tock -> tock -> tock -> [Wait[0]] -> [Wait[0]] -> [Wait[0]] -> enterCS_i -> exitCS_i -> set_i -> [Wait[0]]>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search with Zone Abstraction
+
+
+********Verification Statistics********
+Visited States:135
+Total Transitions:257
+Time Used:0.0620081s
+Estimated Memory Used:42812.288KB
+
+

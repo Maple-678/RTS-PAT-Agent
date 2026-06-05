@@ -1,0 +1,16 @@
+#define OPEN_DURATION 8;
+var doorState = 0;
+var buttonPressed = false;
+
+Door() = open{doorState=1;} -> tick -> Wait[OPEN_DURATION];
+         closing{doorState=2;} -> CheckClose();
+
+CheckClose() = [buttonPressed] reopen{doorState=1;buttonPressed=false;} -> tick -> Wait[OPEN_DURATION];
+                closing{doorState=2;} -> CheckClose()
+                [] [!buttonPressed] close{doorState=0;} -> Door();
+
+Button() = press{buttonPressed=true;} -> Button() [] tick -> Button();
+
+System = Door() ||| Button();
+
+#assert System deadlockfree;

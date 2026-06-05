@@ -1,0 +1,69 @@
+{
+    "codegen-time_2026-06-03-19-47-47": {
+        "runTime": 29.011316299999997
+    },
+    "verification-time_2026-06-03-19-47-52": {
+        "runTime": 5.0160464000000005,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round1_2026-06-03-19-49-07": {
+        "runTime": 74.3027154
+    },
+    "refine-time_round2_2026-06-03-19-50-08": {
+        "runTime": 61.10276120000002
+    },
+    "verification-time_2026-06-03-19-50-09": {
+        "runTime": 1.1001660999999956,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "refine-time_round3_2026-06-03-19-51-17": {
+        "runTime": 68.42096900000001
+    },
+    "verification-time_2026-06-03-19-51-18": {
+        "runTime": 0.9822480999999925,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-19-51-47": {
+        "runTime": 28.77766059999999
+    },
+    "verification-time_2026-06-03-19-51-48": {
+        "runTime": 0.6724652000000333,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-19-52-14": {
+        "runTime": 25.961381899999992
+    },
+    "verification-time_2026-06-03-19-52-15": {
+        "runTime": 1.15717920000003,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-21-43-57": {
+        "runTime": 50.222158
+    },
+    "verification-time_2026-06-03-21-43-58": {
+        "runTime": 0.628906299999997,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-21-44-32": {
+        "runTime": 34.6546932
+    },
+    "verification-time_2026-06-03-21-44-42": {
+        "runTime": 9.241846899999999,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-44-45": {
+        "runTime": 3.627936500000004
+    },
+    "verification-time_2026-06-03-21-44-46": {
+        "runTime": 0.9728008000000017,
+        "hasMismatch": true,
+        "codegenFailed": true
+    }
+}

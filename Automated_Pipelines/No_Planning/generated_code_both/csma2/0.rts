@@ -1,0 +1,14 @@
+#define IDLE 0;
+#define TX0 1;
+#define TX1 2;
+
+var medium = IDLE;
+
+Node0() = ready0 -> listen0 -> ([medium == IDLE] start_tx0{medium = TX0;} -> Wait[3]; finish_tx0{medium = IDLE;} -> Node0() [] [medium != IDLE] backoff0 -> Wait[2]; Node0());
+
+Node1() = ready1 -> listen1 -> ([medium == IDLE] start_tx1{medium = TX1;} -> Wait[3]; finish_tx1{medium = IDLE;} -> Node1() [] [medium != IDLE] backoff1 -> Wait[4]; Node1());
+
+System() = Node0() ||| Node1();
+
+#define mutex !(medium == TX0 && medium == TX1);
+#assert System() deadlockfree;

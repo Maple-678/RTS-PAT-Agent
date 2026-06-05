@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert fddi deadlockfree;",
+    "patResult": "The Assertion (fddi() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert fddi reaches async_done;",
+    "patResult": "The Assertion (fddi() reaches async_done) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> [ifb(((tokenHolder == STATION_A) && (aTicksRemaining == IDLE)))] -> pass_A -> done_A -> \u03c4 -> [ifb(((tokenHolder == STATION_B) && (bTicksRemaining == IDLE)))] -> pass_B -> done_A -> done_B -> done_B -> [ifb(((tokenHolder == STATION_B) && (bTicksRemaining == IDLE)))] -> start_B_sync -> tick -> tick -> \u03c4 -> [ifb(((tokenHolder == STATION_A) && (aTicksRemaining == IDLE)))] -> start_A_async>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "trace": "<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> alert -> \u03c4 -> reset -> \u03c4 -> start -> weld -> \u03c4 -> done>",
+    "current_result": "Invalid",
+    "desired_result": "Valid"
+  }
+]

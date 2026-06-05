@@ -1,0 +1,38 @@
+{
+    "const-var-time": {
+        "runTime": 28.5645919
+    },
+    "time-constraint-time": {
+        "runTime": 18.7609177
+    },
+    "action-time": {
+        "runTime": 55.504599199999994
+    },
+    "nl-annotation-time": {
+        "runTime": 7.387434899999988
+    },
+    "codegen-time_2026-06-03-14-32-35": {
+        "runTime": 64.22444640000003
+    },
+    "verification-time_2026-06-03-14-32-36": {
+        "runTime": 0.717589500000031,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-20-51-14": {
+        "runTime": 39.92185909999999
+    },
+    "verification-time_2026-06-03-20-51-14": {
+        "runTime": 0.3435348999999803,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-20-51-32": {
+        "runTime": 18.03181360000002
+    },
+    "verification-time_2026-06-03-20-51-33": {
+        "runTime": 0.6022931999999912,
+        "hasMismatch": false,
+        "codegenFailed": false
+    }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert atm_timeout deadlockfree;",
+    "patResult": "The Assertion (atm_timeout() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert atm_timeout reaches card_ejected;",
+    "patResult": "The Assertion (atm_timeout() reaches card_ejected) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> card_insert -> card_eject>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

@@ -1,0 +1,12 @@
+#define HEARTBEAT_INTERVAL 2;
+#define TIMEOUT 5;
+var alarm_triggered = false;
+
+Sender() = heartbeat -> Wait[HEARTBEAT_INTERVAL]; Sender();
+
+Monitor() = (heartbeat -> Monitor()) timeout[TIMEOUT] (alarm{alarm_triggered = true;} -> Monitor());
+
+System = Sender() || Monitor();
+
+#define alarm_state (alarm_triggered == true);
+#assert System deadlockfree;

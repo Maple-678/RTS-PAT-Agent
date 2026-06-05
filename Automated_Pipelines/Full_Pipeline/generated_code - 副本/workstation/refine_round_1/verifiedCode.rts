@@ -1,0 +1,18 @@
+#define TIMEOUT_DURATION 10;
+#define IDLE 0;
+#define WELDING 1;
+#define COMPLETED 2;
+#define TIMED_OUT 3;
+#define MONITORING 0;
+#define ALERTING 1;
+#define RESETTING 2;
+
+var armState = IDLE;
+var controllerState = MONITORING;
+
+RobotArm() = start -> ( weld -> done -> RobotArm() ) timeout[TIMEOUT_DURATION] ( alert -> reset -> RobotArm() );
+Controller() = (done -> Controller()) [] (alert -> {controllerState = ALERTING;} -> reset -> {controllerState = RESETTING;} -> {controllerState = MONITORING;} -> Controller());
+System() = RobotArm() || Controller();
+#define alert_raised controllerState == ALERTING;
+#assert System() deadlockfree;
+#assert System() reaches alert_raised;

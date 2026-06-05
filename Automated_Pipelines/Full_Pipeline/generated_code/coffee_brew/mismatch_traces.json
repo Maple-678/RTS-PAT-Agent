@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert coffee_brew deadlockfree;",
+    "trace": "<init -> start_brew -> tock -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> start_brew -> tock -> tock -> tock -> tock -> timeout_event -> [Wait[0]] -> tock -> tock -> [timeout[0]] -> timeout_event -> cleanup>",
+    "current_result": "Invalid",
+    "desired_result": "Valid",
+    "pat_error": "The Assertion (coffee_brew() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> start_brew -> tock -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> start_brew -> tock -> tock -> tock -> tock -> timeout_event -> [Wait[0]] -> tock -> tock -> [timeout[0]] -> timeout_event -> cleanup>"
+  }
+]

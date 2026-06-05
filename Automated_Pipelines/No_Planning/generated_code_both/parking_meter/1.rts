@@ -1,0 +1,29 @@
+#define IDLE 0;
+#define PARKING 1;
+#define EXPIRED 2;
+
+var state = IDLE;
+var violation_issued = false;
+
+Meter() = ifb(state == IDLE) {
+    pay{violation_issued = false; state = PARKING;} -> 
+    Wait[5]; 
+    expire{state = EXPIRED;} -> 
+    WaitForReset()
+};
+
+WaitForReset() = ifb(state == IDLE) {
+    Meter()
+};
+
+Enforcement() = ifb(state == EXPIRED) {
+    Wait[2]; 
+    violation_event{violation_issued = true;} -> 
+    reset{state = IDLE;} -> 
+    Enforcement()
+};
+
+System() = Meter() ||| Enforcement();
+
+#define goal (violation_issued == true);
+#assert System() reaches goal;

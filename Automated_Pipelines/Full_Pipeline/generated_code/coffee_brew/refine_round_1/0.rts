@@ -1,0 +1,20 @@
+#define TIMEOUT_DURATION 6;
+#define IDLE 0;
+#define BREWING 1;
+#define DONE 2;
+#define CLEANUP 3;
+
+var brewState = IDLE;
+
+CoffeeMaker() = start_brew{brewState = BREWING;} -> 
+  ( (Wait[4]; done_brew{brewState = DONE;} -> dispense -> CoffeeMaker()) 
+    timeout[TIMEOUT_DURATION] 
+    (timeout_event{brewState = CLEANUP;} -> cleanup -> CoffeeMaker()) );
+
+Timer() = start_brew -> 
+  ( (Wait[TIMEOUT_DURATION]; timeout_event -> Timer()) [] (done_brew -> Timer()) );
+
+coffee_brew() = CoffeeMaker() || Timer();
+
+#define cleanup_done brewState == CLEANUP;
+#assert coffee_brew deadlockfree;

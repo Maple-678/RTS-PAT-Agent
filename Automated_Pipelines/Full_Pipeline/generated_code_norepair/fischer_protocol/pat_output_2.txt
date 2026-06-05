@@ -1,0 +1,19 @@
+=======================================================
+Assertion: fischer_protocol() |= []<> progress0
+********Verification Result********
+The Assertion (fischer_protocol() |= []<> progress0) is NOT valid.
+A counterexample is presented as follows.
+<init -> set2 -> set3 -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs3_enter -> tock -> [Wait[0]] -> cs3_exit -> tick -> tock -> tock -> tock -> [Wait[0]] -> set3 -> tick -> tock -> tock -> tock -> [Wait[0]] -> set0 -> set1 -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs1_enter -> tock -> [Wait[0]] -> cs1_exit -> tick -> tock -> tock -> tock -> [Wait[0]] -> set1 -> (tick -> tock -> tock -> tock -> [Wait[0]] -> cs1_enter -> tock -> [Wait[0]] -> cs1_exit -> set1)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search with Zone Abstraction
+
+
+********Verification Statistics********
+Visited States:277
+Total Transitions:382
+Time Used:0.0494754s
+Estimated Memory Used:43565.064KB
+
+

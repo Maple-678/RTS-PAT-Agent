@@ -1,0 +1,20 @@
+#define IDLE 0;
+#define BREWING 1;
+#define DISPENSING 2;
+#define CLEANUP 3;
+#define DONE 4;
+
+var state = IDLE;
+
+CoffeeMaker() = start_brew -> {state = BREWING;} -> 
+   ( (Wait[4]; {state = DISPENSING;} -> dispense -> {state = IDLE;} -> Stop) 
+      [] (Wait[10]; {state = DISPENSING;} -> dispense -> {state = IDLE;} -> Stop) ) 
+   timeout[6] 
+   ( {state = CLEANUP;} -> Wait[3]; {state = DONE;} -> cleanup_done -> Stop );
+
+Timer() = Stop;
+
+System() = CoffeeMaker() ||| Timer();
+
+#define cleanup_done (state == DONE);
+#assert System deadlockfree;

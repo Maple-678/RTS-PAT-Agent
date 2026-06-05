@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "Verification result not found",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() |= []safe;",
+    "patResult": "Verification result not found",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  }
+]

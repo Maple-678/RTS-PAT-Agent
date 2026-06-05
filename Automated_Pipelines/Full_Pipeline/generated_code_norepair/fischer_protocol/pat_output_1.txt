@@ -1,0 +1,20 @@
+=======================================================
+Assertion: fischer_protocol() |= [] mutex
+********Verification Result********
+The Assertion (fischer_protocol() |= [] mutex) is NOT valid.
+A counterexample is presented as follows.
+<init -> retry3 -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> set3 -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs3_enter -> tock -> [Wait[0]] -> cs3_exit -> retry2 -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> set2 -> retry3 -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> set3 -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs3_enter -> tock -> [Wait[0]] -> cs3_exit -> tick -> tock -> tock -> tock -> [Wait[0]] -> set3 -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs3_enter -> tock -> [Wait[0]] -> cs3_exit -> retry1 -> tock -> tock -> tock -> tock -> tock -> set3 -> [Wait[0]] -> retry1 -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs3_enter -> tock -> [Wait[0]] -> cs3_exit -> set3 -> tick -> tock -> [Wait[0]] -> tock -> tock -> retry1 -> [Wait[0]] -> cs3_enter -> tock -> [Wait[0]] -> cs3_exit -> set3 -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs3_enter -> tock -> [Wait[0]] -> cs3_exit -> set3 -> tick -> [Wait[0]] -> tock -> tock -> tock -> set1 -> [Wait[0]] -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs1_enter -> tock -> [Wait[0]] -> cs1_exit -> set1 -> retry0 -> tock -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs1_enter -> tock -> [Wait[0]] -> cs1_exit -> [Wait[0]] -> set0 -> retry1 -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> tick -> tock -> tock -> tock -> [Wait[0]] -> retry1 -> tock -> tock -> tock -> tock -> cs0_enter -> tock -> [Wait[0]] -> [Wait[0]] -> set1 -> tick -> tock -> tock -> tock -> [Wait[0]] -> cs1_enter>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using BFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:136
+Total Transitions:441
+Time Used:0.043945s
+Estimated Memory Used:12321.856KB
+
+

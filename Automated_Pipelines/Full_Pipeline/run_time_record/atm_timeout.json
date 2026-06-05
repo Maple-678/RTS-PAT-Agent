@@ -1,0 +1,135 @@
+{
+    "const-var-time": {
+        "runTime": 31.4078625
+    },
+    "time-constraint-time": {
+        "runTime": 6.185301299999999
+    },
+    "action-time": {
+        "runTime": 30.333438800000003
+    },
+    "nl-annotation-time": {
+        "runTime": 8.631038499999988
+    },
+    "codegen-time_2026-06-03-14-27-11": {
+        "runTime": 37.144105800000034
+    },
+    "verification-time_2026-06-03-14-27-12": {
+        "runTime": 0.7269440000000031,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-14-28-30": {
+        "runTime": 78.15698170000019
+    },
+    "codegen-time_2026-06-03-14-29-10": {
+        "runTime": 39.215517899999895
+    },
+    "verification-time_2026-06-03-14-29-10": {
+        "runTime": 0.7228615999999874,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-17-06-23": {
+        "runTime": 78.67396739999998
+    },
+    "codegen-time_2026-06-03-17-07-18": {
+        "runTime": 55.56515429999999
+    },
+    "verification-time_2026-06-03-17-07-19": {
+        "runTime": 0.5460587000000032,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-17-08-27": {
+        "runTime": 68.02274080000001
+    },
+    "verification-time_2026-06-03-17-08-27": {
+        "runTime": 0.5212956000000304,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-17-19-34": {
+        "runTime": 74.7449922
+    },
+    "verification-time_2026-06-03-17-19-35": {
+        "runTime": 0.6641472999999962,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-17-20-57": {
+        "runTime": 82.0917911
+    },
+    "codegen-time_2026-06-03-17-21-54": {
+        "runTime": 56.85464289999999
+    },
+    "verification-time_2026-06-03-17-21-55": {
+        "runTime": 0.6795526999999879,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-17-33-06": {
+        "runTime": 64.170163
+    },
+    "verification-time_2026-06-03-17-33-08": {
+        "runTime": 1.0487575999999876,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-17-33-48": {
+        "runTime": 40.40624890000001
+    },
+    "verification-time_2026-06-03-17-33-49": {
+        "runTime": 0.9983119000000045,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-17-35-05": {
+        "runTime": 75.80846109999999
+    },
+    "verification-time_2026-06-03-17-35-06": {
+        "runTime": 1.0671431000000098,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-18-18-09": {
+        "runTime": 35.4002719
+    },
+    "verification-time_2026-06-03-18-18-10": {
+        "runTime": 0.7242535000000032,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-18-18-27": {
+        "runTime": 17.15388949999999
+    },
+    "verification-time_2026-06-03-18-18-28": {
+        "runTime": 1.2643653000000086,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-20-47-30": {
+        "runTime": 23.260731000000007
+    },
+    "verification-time_2026-06-03-20-47-31": {
+        "runTime": 0.6671501999999947,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-20-47-55": {
+        "runTime": 24.868302100000008
+    },
+    "verification-time_2026-06-03-20-47-56": {
+        "runTime": 0.6799304000000177,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-20-48-32": {
+        "runTime": 35.945799300000004
+    },
+    "verification-time_2026-06-03-20-48-33": {
+        "runTime": 1.2057511000000147,
+        "hasMismatch": true,
+        "codegenFailed": false
+    }
+}

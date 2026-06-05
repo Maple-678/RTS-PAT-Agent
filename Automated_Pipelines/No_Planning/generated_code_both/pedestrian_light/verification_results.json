@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System |= []<>walk;",
+    "patResult": "The Assertion (System() |= []<> walk) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

@@ -1,0 +1,49 @@
+{
+    "const-var-time": {
+        "runTime": 39.3761661
+    },
+    "time-constraint-time": {
+        "runTime": 15.7613019
+    },
+    "action-time": {
+        "runTime": 93.2581266
+    },
+    "nl-annotation-time": {
+        "runTime": 5.5132171999999855
+    },
+    "codegen-time_2026-06-03-14-02-44": {
+        "runTime": 45.690983
+    },
+    "verification-time_2026-06-03-14-02-46": {
+        "runTime": 1.5927877000000024,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-20-09-47": {
+        "runTime": 18.19145540000001
+    },
+    "verification-time_2026-06-03-20-09-48": {
+        "runTime": 1.2060136999999997,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-20-19-08": {
+        "runTime": 0.005863299999999683
+    },
+    "codegen-time_2026-06-03-20-27-56": {
+        "runTime": 14.535611199999991
+    },
+    "verification-time_2026-06-03-20-27-57": {
+        "runTime": 1.2853484999999978,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-20-35-00": {
+        "runTime": 28.951799099999988
+    },
+    "verification-time_2026-06-03-20-35-02": {
+        "runTime": 1.271483499999988,
+        "hasMismatch": false,
+        "codegenFailed": false
+    }
+}

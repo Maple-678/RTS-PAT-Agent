@@ -1,0 +1,20 @@
+[
+  {
+    "assertion": "#assert System deadlockfree;",
+    "patResult": "Verification result not found",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System |= []mutex;",
+    "patResult": "Verification result not found",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System |= []<> (enter_cs.0 || enter_cs.1 || enter_cs.2 || enter_cs.3);",
+    "patResult": "Verification result not found",
+    "actualResult": "",
+    "desiredOutcome": "Invalid"
+  }
+]

@@ -1,0 +1,17 @@
+#define GREEN_DUR 10;
+#define YELLOW_DUR 3;
+#define RED_DUR 10;
+
+var phase = 0;
+
+#define green_active (phase == 0);
+
+Light() = green_phase{phase = 0;} -> tick -> Wait[GREEN_DUR];
+          yellow_phase{phase = 1;} -> tick -> Wait[YELLOW_DUR];
+          red_phase{phase = 2;} -> tick -> Wait[RED_DUR];
+          Light();
+
+System = Light();
+
+#assert System deadlockfree;
+#assert System |= []<>green_active;

@@ -1,0 +1,8 @@
+[
+  {
+    "assertion": "#assert light_blinker deadlockfree;",
+    "patResult": "The Assertion (light_blinker() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

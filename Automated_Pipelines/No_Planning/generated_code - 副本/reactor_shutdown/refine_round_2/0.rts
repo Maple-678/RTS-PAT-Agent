@@ -1,0 +1,10 @@
+#define T_COOL 3
+#define T_SHUTDOWN 5
+#define T_EXTRA (T_SHUTDOWN - T_COOL)
+var state = 0;
+#define shutdown_done (state == 1)
+Reactor() = overheat -> ( cooling -> Reactor() timeout[T_COOL] ( shutdown{state = 1;} -> Stop ) );
+SafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( shutdown -> Stop ) );
+System() = Reactor() || SafetyMonitor();
+
+#assert System() deadlockfree;

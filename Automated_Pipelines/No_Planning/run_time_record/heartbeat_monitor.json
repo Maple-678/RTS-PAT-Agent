@@ -1,0 +1,26 @@
+{
+    "codegen-time_2026-06-03-19-26-18": {
+        "runTime": 3.5728251999999996
+    },
+    "verification-time_2026-06-03-19-26-19": {
+        "runTime": 1.2757482000000007,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-19-28-40": {
+        "runTime": 10.3401583
+    },
+    "verification-time_2026-06-03-19-28-41": {
+        "runTime": 1.3736827999999992,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-32-53": {
+        "runTime": 11.0128236
+    },
+    "verification-time_2026-06-03-21-32-54": {
+        "runTime": 1.2828891999999996,
+        "hasMismatch": false,
+        "codegenFailed": false
+    }
+}

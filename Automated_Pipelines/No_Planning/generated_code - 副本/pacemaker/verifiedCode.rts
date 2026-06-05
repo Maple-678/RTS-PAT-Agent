@@ -1,0 +1,9 @@
+#define HEART_INTERVAL 5;
+#define PACEMAKER_TIMEOUT 2;
+
+Heart() = heart_beat -> Wait[HEART_INTERVAL]; Heart();
+Pacemaker() = (heart_beat -> Pacemaker()) timeout[PACEMAKER_TIMEOUT] (pace_event -> Pacemaker());
+System() = Heart() || Pacemaker();
+
+#assert System deadlockfree;
+#assert System |= [](<>(heart_beat || pace_event));

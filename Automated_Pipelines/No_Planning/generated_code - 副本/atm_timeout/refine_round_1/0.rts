@@ -1,0 +1,16 @@
+#define IDLE 0;
+#define CARD_INSERTED 1;
+#define PIN_RECEIVED 2;
+#define CARD_EJECTED 3;
+#define USER_DELAY 10;
+#define USER_TIMEOUT 9;
+var state = IDLE;
+
+ATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM()) timeout[8] (eject{state = CARD_EJECTED;} -> Stop);
+
+User() = card{state = CARD_INSERTED;} -> ((Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> Stop) timeout[USER_TIMEOUT] Stop);
+
+System() = ATM() || User();
+
+#define card_ejected (state == CARD_EJECTED);
+#assert System() deadlockfree;

@@ -1,0 +1,8 @@
+[
+  {
+    "assertion": "#assert System |= []safe;",
+    "trace": "<init -> set_i -> tock -> tock -> tock -> [Wait[0]] -> enterCS_i -> exitCS_i -> set_i -> tock -> tock -> tock -> [Wait[0]] -> set_i -> tock -> tock -> tock -> [Wait[0]] -> enterCS_i -> exitCS_i -> set_i -> tock -> tock -> tock -> [Wait[0]] -> set_i -> tock -> tock -> tock -> [Wait[0]] -> enterCS_i -> exitCS_i -> set_i -> tock -> tock -> tock -> [Wait[0]] -> set_i -> tock -> tock -> tock -> [Wait[0]] -> enterCS_i -> exitCS_i -> enterCS_i -> set_i -> tock -> tock -> tock -> [Wait[0]] -> enterCS_i>",
+    "current_result": "Invalid",
+    "desired_result": "Valid"
+  }
+]

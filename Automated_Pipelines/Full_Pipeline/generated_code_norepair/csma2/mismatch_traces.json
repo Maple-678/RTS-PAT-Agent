@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert System() |= []no_collision;",
+    "trace": "<init>",
+    "current_result": "Invalid",
+    "desired_result": "Valid",
+    "pat_error": "The Assertion (System() |= [] no_collision) is NOT valid.\nA counterexample is presented as follows.\n<init>"
+  }
+]

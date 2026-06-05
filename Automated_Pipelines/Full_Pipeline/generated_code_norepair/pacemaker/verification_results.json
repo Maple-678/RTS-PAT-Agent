@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System |= []<> beat;",
+    "patResult": "The Assertion (System() |= []<> beat) is NOT valid.\nA counterexample is presented as follows.\n<init -> tock -> [Wait[0]] -> tock -> tock -> tock -> tock -> [Wait[0]] -> (tick_event -> [if!((timeSinceLastBeat >= PACEMAKER_DELAY))] -> tock -> [Wait[0]] -> tick_event -> [if((timeSinceLastBeat >= PACEMAKER_DELAY))] -> deliver_pace -> tock -> [Wait[0]])*>",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Valid"
+  }
+]

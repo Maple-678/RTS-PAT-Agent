@@ -1,0 +1,17 @@
+=======================================================
+Assertion: System() |= []<> pace_deliver
+********Verification Result********
+The Assertion (System() |= []<> pace_deliver) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search with Zone Abstraction
+
+
+********Verification Statistics********
+Visited States:17
+Total Transitions:40
+Time Used:0.0413625s
+Estimated Memory Used:41337.456KB
+
+

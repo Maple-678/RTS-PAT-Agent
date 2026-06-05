@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert System |= []<> beat;",
+    "trace": "<init -> tock -> [Wait[0]] -> tock -> tock -> tock -> tock -> [Wait[0]] -> (tick_event -> [if!((timeSinceLastBeat >= PACEMAKER_DELAY))] -> tock -> [Wait[0]] -> tick_event -> [if((timeSinceLastBeat >= PACEMAKER_DELAY))] -> deliver_pace -> tock -> [Wait[0]])*>",
+    "current_result": "Invalid",
+    "desired_result": "Valid",
+    "pat_error": "The Assertion (System() |= []<> beat) is NOT valid.\nA counterexample is presented as follows.\n<init -> tock -> [Wait[0]] -> tock -> tock -> tock -> tock -> [Wait[0]] -> (tick_event -> [if!((timeSinceLastBeat >= PACEMAKER_DELAY))] -> tock -> [Wait[0]] -> tick_event -> [if((timeSinceLastBeat >= PACEMAKER_DELAY))] -> deliver_pace -> tock -> [Wait[0]])*>"
+  }
+]

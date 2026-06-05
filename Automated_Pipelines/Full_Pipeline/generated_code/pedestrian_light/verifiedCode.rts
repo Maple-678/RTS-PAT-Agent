@@ -1,0 +1,17 @@
+#define WALK 0;
+#define DONT_WALK 1;
+#define WALK_INTERVAL 4;
+#define DONT_WALK_INTERVAL 8;
+
+var pedestrianSignal = DONT_WALK;
+
+Crosswalk() = 
+    set{pedestrianSignal = WALK;} -> tick -> Wait[WALK_INTERVAL]; 
+    set{pedestrianSignal = DONT_WALK;} -> tick -> Wait[DONT_WALK_INTERVAL]; 
+    Crosswalk();
+
+System() = Crosswalk();
+
+#define walk_on (pedestrianSignal == WALK);
+#assert System deadlockfree;
+#assert System |= []<> walk_on;

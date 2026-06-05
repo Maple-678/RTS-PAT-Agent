@@ -1,0 +1,30 @@
+{
+    "const-var-time": {
+        "runTime": 12.966832799999999
+    },
+    "time-constraint-time": {
+        "runTime": 8.4198935
+    },
+    "action-time": {
+        "runTime": 9.308371000000005
+    },
+    "nl-annotation-time": {
+        "runTime": 4.171069099999997
+    },
+    "codegen-time_2026-06-03-14-11-52": {
+        "runTime": 21.031282499999975
+    },
+    "verification-time_2026-06-03-14-11-53": {
+        "runTime": 1.35574680000002,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-20-43-53": {
+        "runTime": 10.669949299999999
+    },
+    "verification-time_2026-06-03-20-43-54": {
+        "runTime": 1.230327299999999,
+        "hasMismatch": false,
+        "codegenFailed": false
+    }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() reaches goal;",
+    "patResult": "The Assertion (System() reaches goal) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> [ifb((state == IDLE))] -> pay -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> expire -> [ifb((state == EXPIRED))] -> tock -> tock -> [Wait[0]] -> violation_event>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

@@ -1,0 +1,20 @@
+=======================================================
+Assertion: parking_meter() deadlockfree
+********Verification Result********
+The Assertion (parking_meter() deadlockfree) is NOT valid.
+The following trace leads to a deadlock situation.
+<init -> pay -> τ -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> expired -> τ -> τ -> tock -> tock -> [Wait[0]] -> issue_violation -> τ>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:11
+Total Transitions:10
+Time Used:0.0325234s
+Estimated Memory Used:8677.584KB
+
+

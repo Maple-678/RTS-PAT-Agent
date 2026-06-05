@@ -1,0 +1,20 @@
+=======================================================
+Assertion: System() reaches goal
+********Verification Result********
+The Assertion (System() reaches goal) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> [ifb((state == IDLE))] -> pay -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> expire -> [ifb((state == EXPIRED))] -> tock -> tock -> [Wait[0]] -> violation_event>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction, and LU Simulation
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:8
+Total Transitions:7
+Time Used:0.0341591s
+Estimated Memory Used:8644.76KB
+
+

@@ -1,0 +1,20 @@
+=======================================================
+Assertion: System() |= [] no_collision
+********Verification Result********
+The Assertion (System() |= [] no_collision) is NOT valid.
+A counterexample is presented as follows.
+<init>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using BFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:0
+Total Transitions:0
+Time Used:0.02322s
+Estimated Memory Used:8595.616KB
+
+

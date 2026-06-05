@@ -1,0 +1,38 @@
+=======================================================
+Assertion: parking_meter() deadlockfree
+********Verification Result********
+The Assertion (parking_meter() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:20
+Total Transitions:25
+Time Used:0.0366025s
+Estimated Memory Used:8626.392KB
+
+
+=======================================================
+Assertion: parking_meter() reaches violation_issued
+********Verification Result********
+The Assertion (parking_meter() reaches violation_issued) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> pay -> τ -> tick -> [Wait[5]] -> expire -> τ -> enforceTick -> [Wait[2]] -> issueViolation -> τ>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:16
+Total Transitions:15
+Time Used:0.0186095s
+Estimated Memory Used:8677.584KB
+
+

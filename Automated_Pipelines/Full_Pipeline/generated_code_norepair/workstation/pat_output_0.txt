@@ -1,0 +1,20 @@
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is NOT valid.
+The following trace leads to a deadlock situation.
+<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> timeoutOccurred -> [ifb((weldingStatus == WELDING_TIMEOUT))] -> alertEvent -> resetWeld -> startWeld -> tock -> tock -> tock -> tock -> tock -> resetWeld -> [Wait[0]] -> finishWeld>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:30
+Total Transitions:119
+Time Used:0.0324874s
+Estimated Memory Used:8890.576KB
+
+

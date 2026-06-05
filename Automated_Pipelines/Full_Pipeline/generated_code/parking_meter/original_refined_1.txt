@@ -1,0 +1,24 @@
+#define paidDuration 5;
+#define gracePeriod 2;
+#define VIOLATION_NONE 0;
+#define VIOLATION_PENDING 1;
+#define VIOLATION_ISSUED 2;
+
+var timeRemaining = 0;
+var violationStatus = VIOLATION_NONE;
+
+Meter() = pay -> {timeRemaining = paidDuration; violationStatus = VIOLATION_NONE;} -> tick -> Wait[paidDuration];
+         Expired();
+Expired() = expire -> {timeRemaining = 0;} -> WaitForReset();
+WaitForReset() = reset -> Meter();
+
+Enforcement() = expire -> {violationStatus = VIOLATION_PENDING;} -> tick -> Wait[gracePeriod];
+               IssueViolation();
+IssueViolation() = issueViolation -> {violationStatus = VIOLATION_ISSUED;} -> reset -> Enforcement();
+
+parking_meter() = Meter() || Enforcement();
+
+#define violation_issued (violationStatus == VIOLATION_ISSUED);
+
+#assert parking_meter deadlockfree;
+#assert parking_meter reaches violation_issued;

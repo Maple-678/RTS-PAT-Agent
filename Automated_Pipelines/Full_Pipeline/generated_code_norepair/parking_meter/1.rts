@@ -1,0 +1,18 @@
+#define METER_UNPAID 0;
+#define METER_PAID 1;
+#define METER_EXPIRED 2;
+#define MONITORING 0;
+#define GRACE_PERIOD_ACTIVE 1;
+#define VIOLATION_ISSUED 2;
+
+var meterStatus = METER_UNPAID;
+var enforcementState = MONITORING;
+
+Meter() = [meterStatus == METER_UNPAID] pay -> {meterStatus = METER_PAID;} -> Wait[5]; expired -> {meterStatus = METER_EXPIRED;} -> Stop;
+
+Enforcement() = [enforcementState == MONITORING] expired -> {enforcementState = GRACE_PERIOD_ACTIVE;} -> Wait[2]; issue_violation -> {enforcementState = VIOLATION_ISSUED;} -> Stop;
+
+parking_meter() = Meter() || Enforcement();
+
+#define violation_issued (enforcementState == VIOLATION_ISSUED);
+#assert parking_meter reaches violation_issued;

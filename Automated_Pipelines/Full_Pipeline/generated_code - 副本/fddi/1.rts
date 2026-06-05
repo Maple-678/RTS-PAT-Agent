@@ -1,0 +1,42 @@
+#define MAX_STATIONS 2;
+#define STATION_A 0;
+#define STATION_B 1;
+#define SYNC_DURATION 2;
+#define ASYNC_DURATION 1;
+#define IDLE 0;
+
+var tokenHolder = STATION_A;
+var aTicksRemaining = IDLE;
+var bTicksRemaining = IDLE;
+var async_sent = false;
+
+SyncTransmit_A() = tick -> tick -> done_A{aTicksRemaining = IDLE;} -> StationA();
+AsyncTransmit_A() = tick -> done_A{aTicksRemaining = IDLE;} -> StationA();
+
+StationA() = 
+  ifb (tokenHolder == STATION_A && aTicksRemaining == IDLE) {
+    (start_A_sync{aTicksRemaining = SYNC_DURATION;} -> SyncTransmit_A())
+    []
+    (start_A_async{aTicksRemaining = ASYNC_DURATION; async_sent = true;} -> AsyncTransmit_A())
+    []
+    (pass_A -> done_A{aTicksRemaining = IDLE;} -> StationA())
+  };
+
+SyncTransmit_B() = tick -> tick -> done_B{bTicksRemaining = IDLE;} -> StationB();
+
+StationB() = 
+  ifb (tokenHolder == STATION_B && bTicksRemaining == IDLE) {
+    (start_B_sync{bTicksRemaining = SYNC_DURATION;} -> SyncTransmit_B())
+    []
+    (pass_B -> done_B{bTicksRemaining = IDLE;} -> StationB())
+  };
+
+Ring() = 
+  (done_A -> {tokenHolder = STATION_B;} -> Ring())
+  []
+  (done_B -> {tokenHolder = STATION_A;} -> Ring());
+
+fddi = Ring() ||| StationA() ||| StationB();
+
+#define async_done (async_sent == true);
+#assert fddi reaches async_done;

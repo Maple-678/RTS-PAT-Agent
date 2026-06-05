@@ -1,0 +1,28 @@
+#define DELTA 3;
+#define EPSILON 5;
+
+var sharedVar = 0;
+var counter = 0;
+var p0_in_cs = false;
+
+Process0() = set0{sharedVar = 0;} -> tick -> Wait[DELTA];
+    [sharedVar == 0] cs0_enter{counter = counter + 1; p0_in_cs = true;} -> Wait[1]; cs0_exit{counter = counter - 1; p0_in_cs = false;} -> Process0()
+    [] [sharedVar != 0] retry0 -> Wait[EPSILON]; Process0();
+
+Process1() = set1{sharedVar = 1;} -> tick -> Wait[DELTA];
+    [sharedVar == 1] cs1_enter{counter = counter + 1;} -> Wait[1]; cs1_exit{counter = counter - 1;} -> Process1()
+    [] [sharedVar != 1] retry1 -> Wait[EPSILON]; Process1();
+
+Process2() = set2{sharedVar = 2;} -> tick -> Wait[DELTA];
+    [sharedVar == 2] cs2_enter{counter = counter + 1;} -> Wait[1]; cs2_exit{counter = counter - 1;} -> Process2()
+    [] [sharedVar != 2] retry2 -> Wait[EPSILON]; Process2();
+
+Process3() = set3{sharedVar = 3;} -> tick -> Wait[DELTA];
+    [sharedVar == 3] cs3_enter{counter = counter + 1;} -> Wait[1]; cs3_exit{counter = counter - 1;} -> Process3()
+    [] [sharedVar != 3] retry3 -> Wait[EPSILON]; Process3();
+
+fischer_protocol = Process0() ||| Process1() ||| Process2() ||| Process3();
+
+#define mutex (counter <= 1);
+#define progress0 (p0_in_cs == true);
+#assert fischer_protocol |= []mutex;

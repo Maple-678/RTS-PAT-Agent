@@ -1,0 +1,21 @@
+#define goal (async_sent == true);
+var token_holder = 0;
+var next_target = 1;
+var async_sent = false;
+
+StationA() = ifb(token_holder == 0) {
+    ( sync_send -> Wait[2]; sync_done -> {token_holder = -1;} -> StationA()
+    [] async_send -> Wait[1]; async_done -> {token_holder = -1; async_sent = true;} -> StationA() )
+};
+
+StationB() = ifb(token_holder == 1) {
+    sync_send -> Wait[2]; sync_done -> {token_holder = -1;} -> StationB()
+};
+
+Ring() = ifb(token_holder == -1) {
+    Wait[1]; pass_token{next_target = 1 - next_target; token_holder = next_target;} -> Ring()
+};
+
+System() = StationA() ||| StationB() ||| Ring();
+
+#assert System() reaches goal;

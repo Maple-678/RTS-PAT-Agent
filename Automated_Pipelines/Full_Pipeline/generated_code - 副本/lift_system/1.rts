@@ -1,0 +1,35 @@
+#define DOOR_OPEN_TICKS 3;
+#define DOOR_CLOSED 0;
+#define DOOR_OPEN 1;
+#define MOVE_TICKS 2;
+#define FLOOR_GROUND 0;
+#define FLOOR_FIRST 1;
+#define CAR_IDLE 0;
+#define CAR_MOVING 1;
+#define NO_FLOOR -1;
+#define BUTTON_PRESSED 1;
+#define BUTTON_NOT_PRESSED 0;
+#define BUTTON_FLOOR 0;
+#define FLOOR2 1;
+
+var doorState = DOOR_CLOSED;
+var doorTimer = 0;
+var currentFloor = FLOOR_GROUND;
+var carState = CAR_IDLE;
+var moveTimer = 0;
+var requestedFloor = NO_FLOOR;
+var buttonState = BUTTON_NOT_PRESSED;
+
+Door() = openDoor{doorState = DOOR_OPEN;} -> Wait[DOOR_OPEN_TICKS]; closeDoor{doorState = DOOR_CLOSED;} -> Door();
+
+LiftCar() = ifb (buttonState == BUTTON_PRESSED) {
+    startMove{carState = CAR_MOVING; buttonState = BUTTON_NOT_PRESSED; moveTimer = 0;} -> Wait[MOVE_TICKS];
+    arrive{if (currentFloor == FLOOR_GROUND) { currentFloor = FLOOR_FIRST; } else { currentFloor = FLOOR_GROUND; } carState = CAR_IDLE;} -> LiftCar()
+};
+
+Button() = press{buttonState = BUTTON_PRESSED; if (currentFloor == FLOOR_GROUND) { requestedFloor = FLOOR_FIRST; } else { requestedFloor = FLOOR_GROUND; }} -> Button();
+
+lift_system = Door() ||| LiftCar() ||| Button();
+
+#define at_floor2 currentFloor == FLOOR2;
+#assert lift_system reaches at_floor2;

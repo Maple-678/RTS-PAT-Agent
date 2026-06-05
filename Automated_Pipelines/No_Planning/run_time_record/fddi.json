@@ -1,0 +1,50 @@
+{
+    "codegen-time_2026-06-03-19-56-36": {
+        "runTime": 27.5772965
+    },
+    "verification-time_2026-06-03-19-56-39": {
+        "runTime": 2.4695719999999994,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-19-57-01": {
+        "runTime": 22.333258999999998
+    },
+    "verification-time_2026-06-03-19-57-04": {
+        "runTime": 3.0099658000000034,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round1_2026-06-03-19-58-03": {
+        "runTime": 58.866585
+    },
+    "verification-time_2026-06-03-19-58-06": {
+        "runTime": 3.196083900000005,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-48-20": {
+        "runTime": 23.797445900000003
+    },
+    "verification-time_2026-06-03-21-48-20": {
+        "runTime": 0.6412644000000007,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-21-49-01": {
+        "runTime": 40.9495977
+    },
+    "verification-time_2026-06-03-21-49-02": {
+        "runTime": 0.5059133000000031,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-21-49-40": {
+        "runTime": 38.406898299999995
+    },
+    "verification-time_2026-06-03-21-49-41": {
+        "runTime": 1.342962,
+        "hasMismatch": false,
+        "codegenFailed": false
+    }
+}

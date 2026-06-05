@@ -1,0 +1,19 @@
+#define CHANNEL_IDLE 0;
+#define TX0 1;
+#define TX1 2;
+#define TRANSMIT_DURATION 3;
+#define BACKOFF_NODE0 2;
+#define BACKOFF_NODE1 4;
+
+var medium = CHANNEL_IDLE;
+
+Node0() = listen0 -> ([medium == CHANNEL_IDLE] start_tx0{medium = TX0;} -> Wait[TRANSMIT_DURATION]; finish_tx0{medium = CHANNEL_IDLE;} -> Node0() [] [medium != CHANNEL_IDLE] backoff0 -> Wait[BACKOFF_NODE0]; Node0());
+
+Node1() = listen1 -> ([medium == CHANNEL_IDLE] start_tx1{medium = TX1;} -> Wait[TRANSMIT_DURATION]; finish_tx1{medium = CHANNEL_IDLE;} -> Node1() [] [medium != CHANNEL_IDLE] backoff1 -> Wait[BACKOFF_NODE1]; Node1());
+
+System() = Node0() ||| Node1();
+
+#define no_collision (medium == TX0 || medium == TX1);
+
+#assert System() deadlockfree;
+#assert System() |= []no_collision;

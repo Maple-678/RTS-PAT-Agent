@@ -1,0 +1,38 @@
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:2052
+Total Transitions:5946
+Time Used:0.0508234s
+Estimated Memory Used:10861.888KB
+
+
+=======================================================
+Assertion: System() reaches async_done
+********Verification Result********
+The Assertion (System() reaches async_done) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> start_async_a>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:4
+Total Transitions:3
+Time Used:0.0076488s
+Estimated Memory Used:8620.24KB
+
+

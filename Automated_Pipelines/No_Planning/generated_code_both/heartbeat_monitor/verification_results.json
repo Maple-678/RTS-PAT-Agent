@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() reaches alarm_state;",
+    "patResult": "The Assertion (System() reaches alarm_state) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> alarm_set>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

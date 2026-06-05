@@ -1,0 +1,21 @@
+#define GREEN_PHASE 0;
+#define YELLOW_PHASE 1;
+#define RED_PHASE 2;
+#define GREEN_DURATION 10;
+#define YELLOW_DURATION 3;
+#define RED_DURATION 10;
+
+var currentPhase = GREEN_PHASE;
+
+Light() = 
+  {currentPhase = GREEN_PHASE;} -> tick -> Wait[GREEN_DURATION];
+  {currentPhase = YELLOW_PHASE;} -> tick -> Wait[YELLOW_DURATION];
+  {currentPhase = RED_PHASE;} -> tick -> Wait[RED_DURATION];
+  Light();
+
+#define green_active (currentPhase == GREEN_PHASE);
+
+System = Light();
+
+#assert System deadlockfree;
+#assert System |= []<>green_active;

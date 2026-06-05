@@ -1,0 +1,55 @@
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:2807
+Total Transitions:7891
+Time Used:0.103449s
+Estimated Memory Used:10609.248KB
+
+
+=======================================================
+Assertion: System() |= [] safe
+********Verification Result********
+The Assertion (System() |= [] safe) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using BFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:3579
+Total Transitions:9782
+Time Used:0.0818388s
+Estimated Memory Used:12294.56KB
+
+
+=======================================================
+Assertion: System() |= []<> progress0
+********Verification Result********
+The Assertion (System() |= []<> progress0) is NOT valid.
+A counterexample is presented as follows.
+<init -> set_i -> tock -> tock -> tock -> [Wait[0]] -> set_i -> tock -> tock -> tock -> [Wait[0]] -> set_i -> tock -> tock -> tock -> [Wait[0]] -> set_i -> tock -> tock -> tock -> ([Wait[0]] -> enterCS_i -> exitCS_i -> set_i -> tock -> tock -> tock)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search with Zone Abstraction
+
+
+********Verification Statistics********
+Visited States:69
+Total Transitions:97
+Time Used:0.029415s
+Estimated Memory Used:41967.752KB
+
+

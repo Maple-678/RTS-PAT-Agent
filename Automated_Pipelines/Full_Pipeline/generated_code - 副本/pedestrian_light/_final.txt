@@ -1,0 +1,35 @@
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Zone Abstraction
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:6
+Total Transitions:6
+Time Used:0.0315758s
+Estimated Memory Used:8560.856KB
+
+
+=======================================================
+Assertion: System() |= []<> walk_on
+********Verification Result********
+The Assertion (System() |= []<> walk_on) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search with Zone Abstraction
+
+
+********Verification Statistics********
+Visited States:11
+Total Transitions:12
+Time Used:0.020035s
+Estimated Memory Used:41247.344KB
+
+

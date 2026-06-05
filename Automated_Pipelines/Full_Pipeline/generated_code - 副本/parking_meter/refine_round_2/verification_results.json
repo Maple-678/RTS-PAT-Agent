@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert parking_meter deadlockfree;",
+    "patResult": "Verification result not found - potential syntax error",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert parking_meter reaches violation_issued;",
+    "patResult": "Verification result not found - potential syntax error",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  }
+]

@@ -1,1 +1,424 @@
-[]
+[
+  {
+    "timestamp": "2026-06-03 19:26:18",
+    "processedCode": "#define HEARTBEAT_INTERVAL 2;\n#define TIMEOUT_DURATION 5;\nvar alarm_state = false;\n\nSender() = Wait[HEARTBEAT_INTERVAL]; heartbeat -> Sender();\n\nMonitor() = (heartbeat -> Monitor()) timeout[TIMEOUT_DURATION] (alarm{alarm_state = true;} -> Monitor());\n\nSystem() = Sender() ||| Monitor();\n\n#define alarm_reached (alarm_state == true);\n\n#assert System() deadlockfree;\n#assert System() reaches alarm_reached;"
+  },
+  {
+    "timestamp": "2026-06-03 19:26:26",
+    "processedCode": "#define on 1;\n#define off 2;\n\nLight() = on -> Wait[3]; off -> Wait[3]; Light();\n\n#assert Light() deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 19:26:32",
+    "processedCode": "Light() = on -> Wait[3]; off -> Wait[3]; Light();\n#assert Light deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 19:28:40",
+    "processedCode": "var alarm_triggered = false;\n\nSender() = heartbeat -> Wait[2]; Sender();\n\nMonitor() = (heartbeat -> Monitor()) timeout[5] (alarm{alarm_triggered = true} -> Monitor());\n\nSystem() = Sender() || Monitor();\n\n#define alarm_state (alarm_triggered == true);\n\n#assert System() deadlockfree;\n\n#assert System() reaches alarm_state;"
+  },
+  {
+    "timestamp": "2026-06-03 19:28:48",
+    "processedCode": "#define on 0;\n#define off 1;\n\nLight() = on -> Wait[3]; off -> Wait[3]; Light();\n\n#assert Light() deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 19:28:51",
+    "processedCode": "Light() = on -> Wait[3]; off -> Wait[3]; Light();\n#assert Light() deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 19:29:43",
+    "processedCode": "enum {IDLE, BREWING, DISPENSING, CLEANUP, DONE};\nvar state = IDLE;\n\nCoffeeMaker() = brew{state = BREWING;} -> ( (Wait[4]; dispense{state = DISPENSING;} -> finish{state = DONE;} -> Stop) [] (Wait[7]; fail) ) timeout[6] (cleanup{state = CLEANUP;} -> Wait[1]; cleanup_done{state = DONE;} -> Stop);\n\nTimer() = Wait[6] -> timer_signal -> Timer();\n\nSystem() = CoffeeMaker() ||| Timer();\n\n#define cleanup_done (state == DONE);\n#assert System() deadlockfree;\n#assert System() reaches cleanup_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:30:16",
+    "processedCode": "#define goal (cleaned == 1);\n\nvar cleaned = 0;\nvar timeout_occurred = 0;\n\nTimer() = Wait[6]; set_timeout{timeout_occurred = 1;} -> Stop;\n\nCoffeeMaker() = brew -> (\n    (Wait[4]; ifb(!timeout_occurred) { dispense -> Stop })\n    []\n    (Wait[7]; ifb(timeout_occurred) { cleanup_done{cleaned = 1;} -> Stop })\n);\n\nSystem() = CoffeeMaker() ||| Timer();\n\n#assert System() deadlockfree;\n#assert System() reaches goal;"
+  },
+  {
+    "timestamp": "2026-06-03 19:31:10",
+    "processedCode": "enum {IDLE, BREWING, DISPENSED, CLEANING, CLEANED};\nvar state = IDLE;\n\nCoffeeMaker() = start{state = BREWING} -> \n   ( (wait_fast -> Wait[4]; dispense{state = DISPENSED} -> CoffeeMaker())\n     [] \n     (wait_slow -> Wait[8]; Stop)\n   ) timeout[6] \n   (cleanup{state = CLEANING} -> Wait[1]; cleaned{state = CLEANED} -> CoffeeMaker());\n\nTimer() = timer_tick -> Timer();\n\nSystem() = CoffeeMaker ||| Timer();\n\n#define cleanup_done (state == CLEANED);\n#assert System() deadlockfree;\n#assert System() reaches cleanup_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:31:26",
+    "processedCode": "enum {WALK, DONT_WALK};\nvar state = 0;\n\n#define walk (state == 0);\n#define dont_walk (state == 1);\n\nCrosswalk() = walk_on{state = 0;} -> Wait[4]; dont_walk_on{state = 1;} -> Wait[8]; Crosswalk();\n\nSystem() = Crosswalk();\n\n#assert System() deadlockfree;\n#assert System() |= []<>walk;"
+  },
+  {
+    "timestamp": "2026-06-03 19:31:41",
+    "processedCode": "#define GREEN_DUR 10;\n#define YELLOW_DUR 3;\n#define RED_DUR 10;\n\nvar phase = 0;\n\n#define green_active (phase == 0);\n\nLight() = green_phase{phase = 0;} -> tick -> Wait[GREEN_DUR];\n          yellow_phase{phase = 1;} -> tick -> Wait[YELLOW_DUR];\n          red_phase{phase = 2;} -> tick -> Wait[RED_DUR];\n          Light();\n\nSystem = Light();\n\n#assert System deadlockfree;\n#assert System |= []<>green_active;"
+  },
+  {
+    "timestamp": "2026-06-03 19:32:05",
+    "processedCode": "#define PARKING_DURATION 5;\n#define GRACE_PERIOD 2;\n\nvar meter_expired = 0;\nvar violation_flag = 0;\n\nMeter() = pay{meter_expired = 0;} -> Wait[PARKING_DURATION];\n          expire{meter_expired = 1;} -> Meter();\n\nEnforcement() = ifb(meter_expired == 1) {\n    Wait[GRACE_PERIOD];\n    violation_issued{violation_flag = 1; meter_expired = 0;} -> Enforcement()\n};\n\nSystem() = Meter() ||| Enforcement();\n\n#define goal (violation_flag == 1);\n#assert System() deadlockfree;\n#assert System() reaches goal;"
+  },
+  {
+    "timestamp": "2026-06-03 19:32:54",
+    "processedCode": "#define IDLE 0;\n#define CARD_INSERTED 1;\n#define PIN_RECEIVED 2;\n#define CARD_EJECTED 3;\n#define USER_DELAY 10;\n#define USER_TIMEOUT 9;\nvar state = IDLE;\n\nATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM())\n        timeout[8] eject{state = CARD_EJECTED;} -> Stop;\n\nUser() = card{state = CARD_INSERTED;} -> (Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> Stop)\n         timeout[USER_TIMEOUT] Stop;\n\nSystem() = ATM() || User();\n\n#define card_ejected (state == CARD_EJECTED);\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;"
+  },
+  {
+    "timestamp": "2026-06-03 19:34:01",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define IDLE 0;\n#define CARD_INSERTED 1;\n#define PIN_RECEIVED 2;\n#define CARD_EJECTED 3;\n#define USER_DELAY 10;\n#define USER_TIMEOUT 9;\nvar state = IDLE;\n\nATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM())\n        timeout[8] eject{state = CARD_EJECTED;} -> Stop;\n\nUser() = card{state = CARD_INSERTED;} -> (Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> Stop)\n         timeout[USER_TIMEOUT] Stop;\n\nSystem() = ATM() || User();\n\n#define card_ejected (state == CARD_EJECTED);\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> card -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "```\n#define IDLE 0;\n#define CARD_INSERTED 1;\n#define PIN_RECEIVED 2;\n#define CARD_EJECTED 3;\n#define USER_DELAY 10;\n#define USER_TIMEOUT 9;\nvar state = IDLE;\n\nATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM()) timeout[8] (eject{state = CARD_EJECTED;} -> Stop);\n\nUser() = card{state = CARD_INSERTED;} -> ((Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> Stop) timeout[USER_TIMEOUT] Stop);\n\nSystem() = ATM() || User();\n\n#define card_ejected (state == CARD_EJECTED);\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;\n```",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:34:01",
+    "processedCode": "#define IDLE 0;\n#define CARD_INSERTED 1;\n#define PIN_RECEIVED 2;\n#define CARD_EJECTED 3;\n#define USER_DELAY 10;\n#define USER_TIMEOUT 9;\nvar state = IDLE;\n\nATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM()) timeout[8] (eject{state = CARD_EJECTED;} -> Stop);\n\nUser() = card{state = CARD_INSERTED;} -> ((Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> Stop) timeout[USER_TIMEOUT] Stop);\n\nSystem() = ATM() || User();\n\n#define card_ejected (state == CARD_EJECTED);\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;"
+  },
+  {
+    "timestamp": "2026-06-03 19:35:16",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define IDLE 0;\n#define CARD_INSERTED 1;\n#define PIN_RECEIVED 2;\n#define CARD_EJECTED 3;\n#define USER_DELAY 10;\n#define USER_TIMEOUT 9;\nvar state = IDLE;\n\nATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM()) timeout[8] (eject{state = CARD_EJECTED;} -> Stop);\n\nUser() = card{state = CARD_INSERTED;} -> ((Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> Stop) timeout[USER_TIMEOUT] Stop);\n\nSystem() = ATM() || User();\n\n#define card_ejected (state == CARD_EJECTED);\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> card -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:36:04",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define IDLE 0;\n#define CARD_INSERTED 1;\n#define PIN_RECEIVED 2;\n#define CARD_EJECTED 3;\n#define USER_DELAY 10;\n#define USER_TIMEOUT 9;\nvar state = IDLE;\n\nATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM()) timeout[8] (eject{state = CARD_EJECTED;} -> Stop);\n\nUser() = card{state = CARD_INSERTED;} -> ((Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> Stop) timeout[USER_TIMEOUT] Stop);\n\nSystem() = ATM() || User();\n\n#define card_ejected (state == CARD_EJECTED);\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> card -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "```\n#define IDLE 0\n#define CARD_INSERTED 1\n#define PIN_RECEIVED 2\n#define CARD_EJECTED 3\n#define USER_DELAY 10\n#define USER_TIMEOUT 9\nvar state = IDLE;\n\nATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM()) timeout[8] (eject{state = CARD_EJECTED;} -> ATM());\n\nUser() = card{state = CARD_INSERTED;} -> ((Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> User()) timeout[USER_TIMEOUT] User());\n\nSystem() = ATM() || User();\n\n#define card_ejected (state == CARD_EJECTED);\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;\n```",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:36:04",
+    "processedCode": "#define IDLE 0\n#define CARD_INSERTED 1\n#define PIN_RECEIVED 2\n#define CARD_EJECTED 3\n#define USER_DELAY 10\n#define USER_TIMEOUT 9\nvar state = IDLE;\n\nATM() = card{state = CARD_INSERTED;} -> (pin{state = PIN_RECEIVED;} -> process{state = IDLE;} -> ATM()) timeout[8] (eject{state = CARD_EJECTED;} -> ATM());\n\nUser() = card{state = CARD_INSERTED;} -> ((Wait[USER_DELAY]; pin{state = PIN_RECEIVED;} -> User()) timeout[USER_TIMEOUT] User());\n\nSystem() = ATM() || User();\n\n#define card_ejected (state == CARD_EJECTED);\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;"
+  },
+  {
+    "timestamp": "2026-06-03 19:36:37",
+    "processedCode": "var ejected = false;\n#define card_ejected_state (ejected == true);\n\nATM() = card_insert -> (pin_input -> transaction -> Stop) timeout[8] (card_ejected{ejected = true;} -> Stop);\nUser() = card_insert -> (pin_input -> Stop) timeout[9] Stop;\nSystem() = ATM() || User();\n\n#assert System() deadlockfree;\n#assert System() reaches card_ejected_state;"
+  },
+  {
+    "timestamp": "2026-06-03 19:37:54",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\nvar ejected = false;\n#define card_ejected_state (ejected == true);\n\nATM() = card_insert -> (pin_input -> transaction -> Stop) timeout[8] (card_ejected{ejected = true;} -> Stop);\nUser() = card_insert -> (pin_input -> Stop) timeout[9] Stop;\nSystem() = ATM() || User();\n\n#assert System() deadlockfree;\n#assert System() reaches card_ejected_state;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> tock -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:39:09",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\nvar ejected = false;\n#define card_ejected_state (ejected == true);\n\nATM() = card_insert -> (pin_input -> transaction -> Stop) timeout[8] (card_ejected{ejected = true;} -> Stop);\nUser() = card_insert -> (pin_input -> Stop) timeout[9] Stop;\nSystem() = ATM() || User();\n\n#assert System() deadlockfree;\n#assert System() reaches card_ejected_state;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> tock -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:39:44",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\nvar ejected = false;\n#define card_ejected_state (ejected == true);\n\nATM() = card_insert -> (pin_input -> transaction -> Stop) timeout[8] (card_ejected{ejected = true;} -> Stop);\nUser() = card_insert -> (pin_input -> Stop) timeout[9] Stop;\nSystem() = ATM() || User();\n\n#assert System() deadlockfree;\n#assert System() reaches card_ejected_state;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> tock -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "var ejected = false;\n#define card_ejected_state (ejected == true);\n\nATM() = card_insert -> (pin_input -> transaction -> ATM()) timeout[8] (card_ejected{ejected = true;} -> ATM());\nUser() = card_insert -> (pin_input -> User()) timeout[9] User();\nSystem() = ATM() || User();\n\n#assert System() deadlockfree;\n#assert System() reaches card_ejected_state;",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:39:44",
+    "processedCode": "var ejected = false;\n#define card_ejected_state (ejected == true);\n\nATM() = card_insert -> (pin_input -> transaction -> ATM()) timeout[8] (card_ejected{ejected = true;} -> ATM());\nUser() = card_insert -> (pin_input -> User()) timeout[9] User();\nSystem() = ATM() || User();\n\n#assert System() deadlockfree;\n#assert System() reaches card_ejected_state;"
+  },
+  {
+    "timestamp": "2026-06-03 19:40:12",
+    "processedCode": "#define OPEN_DURATION 8;\nvar doorState = 0;\nvar buttonPressed = false;\n\nDoor() = open{doorState=1;} -> tick -> Wait[OPEN_DURATION];\n         closing{doorState=2;} -> CheckClose();\n\nCheckClose() = [buttonPressed] reopen{doorState=1;buttonPressed=false;} -> tick -> Wait[OPEN_DURATION];\n                closing{doorState=2;} -> CheckClose()\n                [] [!buttonPressed] close{doorState=0;} -> Door();\n\nButton() = press{buttonPressed=true;} -> Button() [] tick -> Button();\n\nSystem = Door() ||| Button();\n#assert System deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 19:40:53",
+    "processedCode": "#define T_COOL 3;\n#define T_SHUTDOWN 5;\n#define T_EXTRA (T_SHUTDOWN - T_COOL);\nvar state = 0;\n#define shutdown_done (state == 1);\nReactor() = overheat -> ( cooling -> Reactor() [] shutdown{state = 1;} -> Stop );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( ( shutdown -> Stop ) within[T_EXTRA] ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:41:18",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define T_COOL 3;\n#define T_SHUTDOWN 5;\n#define T_EXTRA (T_SHUTDOWN - T_COOL);\nvar state = 0;\n#define shutdown_done (state == 1);\nReactor() = overheat -> ( cooling -> Reactor() [] shutdown{state = 1;} -> Stop );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( ( shutdown -> Stop ) within[T_EXTRA] ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> tock -> tock -> tock -> [timeout[0]] -> shutdown -> shutdown>\n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "#define T_COOL 3\n#define T_SHUTDOWN 5\n#define T_EXTRA (T_SHUTDOWN - T_COOL)\nvar state = 0;\n#define shutdown_done (state == 1)\nReactor() = overheat -> ( cooling -> Reactor() [] shutdown{state = 1;} -> Reactor() );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( ( shutdown -> SafetyMonitor() ) within[T_EXTRA] ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:41:18",
+    "processedCode": "#define T_COOL 3\n#define T_SHUTDOWN 5\n#define T_EXTRA (T_SHUTDOWN - T_COOL)\nvar state = 0;\n#define shutdown_done (state == 1)\nReactor() = overheat -> ( cooling -> Reactor() [] shutdown{state = 1;} -> Reactor() );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( ( shutdown -> SafetyMonitor() ) within[T_EXTRA] ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:41:57",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define T_COOL 3;\n#define T_SHUTDOWN 5;\n#define T_EXTRA (T_SHUTDOWN - T_COOL);\nvar state = 0;\n#define shutdown_done (state == 1);\nReactor() = overheat -> ( cooling -> Reactor() [] shutdown{state = 1;} -> Stop );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( ( shutdown -> Stop ) within[T_EXTRA] ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> tock -> tock -> tock -> [timeout[0]] -> shutdown -> shutdown>\n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "#define T_COOL 3\n#define T_SHUTDOWN 5\n#define T_EXTRA (T_SHUTDOWN - T_COOL)\nvar state = 0;\n#define shutdown_done (state == 1)\nReactor() = overheat -> ( cooling -> Reactor() timeout[T_COOL] ( shutdown{state = 1;} -> Stop ) );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( shutdown -> Stop ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:41:57",
+    "processedCode": "#define T_COOL 3\n#define T_SHUTDOWN 5\n#define T_EXTRA (T_SHUTDOWN - T_COOL)\nvar state = 0;\n#define shutdown_done (state == 1)\nReactor() = overheat -> ( cooling -> Reactor() timeout[T_COOL] ( shutdown{state = 1;} -> Stop ) );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( shutdown -> Stop ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:42:56",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define T_COOL 3;\n#define T_SHUTDOWN 5;\n#define T_EXTRA (T_SHUTDOWN - T_COOL);\nvar state = 0;\n#define shutdown_done (state == 1);\nReactor() = overheat -> ( cooling -> Reactor() [] shutdown{state = 1;} -> Stop );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( ( shutdown -> Stop ) within[T_EXTRA] ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> tock -> tock -> tock -> [timeout[0]] -> shutdown -> shutdown>\n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "#define T_COOL 3\n#define T_SHUTDOWN 5\n#define T_EXTRA (T_SHUTDOWN - T_COOL)\nvar state = 0;\n#define shutdown_done (state == 1)\nReactor() = overheat -> ( cooling -> Reactor() [] shutdown{state = 1;} -> Stop );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( ( shutdown -> Stop ) within[T_EXTRA] ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:42:56",
+    "processedCode": "#define T_COOL 3\n#define T_SHUTDOWN 5\n#define T_EXTRA (T_SHUTDOWN - T_COOL)\nvar state = 0;\n#define shutdown_done (state == 1)\nReactor() = overheat -> ( cooling -> Reactor() [] shutdown{state = 1;} -> Stop );\nSafetyMonitor() = overheat -> ( ( cooling -> SafetyMonitor() ) timeout[T_COOL] ( ( shutdown -> Stop ) within[T_EXTRA] ) );\nSystem() = Reactor() || SafetyMonitor();\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:43:52",
+    "processedCode": "#define NORMAL 0;\n#define OVERHEATED 1;\n#define SHUTDOWN 2;\n\nvar reactor_state = NORMAL;\n\nReactor() = \n    Normal();\n\nNormal() = \n    overheat{reactor_state = OVERHEATED;} -> Overheated();\n\nOverheated() = \n    Wait[4]; \n    (\n        cooling{reactor_state = NORMAL;} -> Normal()\n        []\n        emergency_shutdown{reactor_state = SHUTDOWN;} -> Shutdown()\n    );\n\nShutdown() = Stop;\n\nSafetyMonitor() = \n    overheat -> \n    (\n        (cooling -> SafetyMonitor()) \n        timeout[3] \n        (emergency_shutdown -> Stop within[5])\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (reactor_state == SHUTDOWN);\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:44:14",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define NORMAL 0;\n#define OVERHEATED 1;\n#define SHUTDOWN 2;\n\nvar reactor_state = NORMAL;\n\nReactor() = \n    Normal();\n\nNormal() = \n    overheat{reactor_state = OVERHEATED;} -> Overheated();\n\nOverheated() = \n    Wait[4]; \n    (\n        cooling{reactor_state = NORMAL;} -> Normal()\n        []\n        emergency_shutdown{reactor_state = SHUTDOWN;} -> Shutdown()\n    );\n\nShutdown() = Stop;\n\nSafetyMonitor() = \n    overheat -> \n    (\n        (cooling -> SafetyMonitor()) \n        timeout[3] \n        (emergency_shutdown -> Stop within[5])\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (reactor_state == SHUTDOWN);\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> tock -> tock -> tock -> [timeout[0]] -> overheat -> tock -> tock -> tock -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "#define NORMAL 0;\n#define OVERHEATED 1;\n#define SHUTDOWN 2;\n\nvar reactor_state = NORMAL;\n\nReactor() = \n    Normal();\n\nNormal() = \n    overheat{reactor_state = OVERHEATED;} -> Overheated();\n\nOverheated() = \n    Wait[4]; \n    (\n        cooling{reactor_state = NORMAL;} -> Normal()\n        []\n        emergency_shutdown{reactor_state = SHUTDOWN;} -> Shutdown()\n    );\n\nShutdown() = Stop;\n\nSafetyMonitor() = \n    overheat -> \n    (\n        (cooling -> SafetyMonitor()) \n        timeout[5] \n        (emergency_shutdown -> Stop within[5])\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (reactor_state == SHUTDOWN);\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:44:14",
+    "processedCode": "#define NORMAL 0;\n#define OVERHEATED 1;\n#define SHUTDOWN 2;\n\nvar reactor_state = NORMAL;\n\nReactor() = \n    Normal();\n\nNormal() = \n    overheat{reactor_state = OVERHEATED;} -> Overheated();\n\nOverheated() = \n    Wait[4]; \n    (\n        cooling{reactor_state = NORMAL;} -> Normal()\n        []\n        emergency_shutdown{reactor_state = SHUTDOWN;} -> Shutdown()\n    );\n\nShutdown() = Stop;\n\nSafetyMonitor() = \n    overheat -> \n    (\n        (cooling -> SafetyMonitor()) \n        timeout[5] \n        (emergency_shutdown -> Stop within[5])\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (reactor_state == SHUTDOWN);\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:45:28",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define NORMAL 0;\n#define OVERHEATED 1;\n#define SHUTDOWN 2;\n\nvar reactor_state = NORMAL;\n\nReactor() = \n    Normal();\n\nNormal() = \n    overheat{reactor_state = OVERHEATED;} -> Overheated();\n\nOverheated() = \n    Wait[4]; \n    (\n        cooling{reactor_state = NORMAL;} -> Normal()\n        []\n        emergency_shutdown{reactor_state = SHUTDOWN;} -> Shutdown()\n    );\n\nShutdown() = Stop;\n\nSafetyMonitor() = \n    overheat -> \n    (\n        (cooling -> SafetyMonitor()) \n        timeout[5] \n        (emergency_shutdown -> Stop within[5])\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (reactor_state == SHUTDOWN);\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> overheat -> tock -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:46:25",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define NORMAL 0;\n#define OVERHEATED 1;\n#define SHUTDOWN 2;\n\nvar reactor_state = NORMAL;\n\nReactor() = \n    Normal();\n\nNormal() = \n    overheat{reactor_state = OVERHEATED;} -> Overheated();\n\nOverheated() = \n    Wait[4]; \n    (\n        cooling{reactor_state = NORMAL;} -> Normal()\n        []\n        emergency_shutdown{reactor_state = SHUTDOWN;} -> Shutdown()\n    );\n\nShutdown() = Stop;\n\nSafetyMonitor() = \n    overheat -> \n    (\n        (cooling -> SafetyMonitor()) \n        timeout[5] \n        (emergency_shutdown -> Stop within[5])\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (reactor_state == SHUTDOWN);\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> overheat -> tock -> \n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "```\n#define NORMAL 0;\n#define OVERHEATED 1;\n#define SHUTDOWN 2;\n\nvar reactor_state = NORMAL;\n\nReactor() = \n    Normal();\n\nNormal() = \n    overheat{reactor_state = OVERHEATED;} -> Overheated();\n\nOverheated() = \n    Wait[4]; \n    (\n        cooling{reactor_state = NORMAL;} -> Normal()\n        []\n        emergency_shutdown{reactor_state = SHUTDOWN;} -> Shutdown()\n    );\n\nShutdown() = Skip;\n\nSafetyMonitor() = \n    overheat -> \n    (\n        (cooling -> SafetyMonitor()) \n        timeout[5] \n        (emergency_shutdown -> Skip)\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (reactor_state == SHUTDOWN);\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;\n```",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:46:25",
+    "processedCode": "#define NORMAL 0;\n#define OVERHEATED 1;\n#define SHUTDOWN 2;\n\nvar reactor_state = NORMAL;\n\nReactor() = \n    Normal();\n\nNormal() = \n    overheat{reactor_state = OVERHEATED;} -> Overheated();\n\nOverheated() = \n    Wait[4]; \n    (\n        cooling{reactor_state = NORMAL;} -> Normal()\n        []\n        emergency_shutdown{reactor_state = SHUTDOWN;} -> Shutdown()\n    );\n\nShutdown() = Skip;\n\nSafetyMonitor() = \n    overheat -> \n    (\n        (cooling -> SafetyMonitor()) \n        timeout[5] \n        (emergency_shutdown -> Skip)\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (reactor_state == SHUTDOWN);\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:46:51",
+    "processedCode": "#define T 10;\nvar alertFlag = 0;\n\nRobotArm() = start_weld -> ( (weld_done -> Stop) timeout[T] (alert{alertFlag=1;} -> reset{alertFlag=0;} -> Stop) );\nController() = Skip;\nSystem() = RobotArm() ||| Controller();\n\n#define alert_raised (alertFlag == 1);\n\n#assert System() deadlockfree;\n#assert System() reaches alert_raised;"
+  },
+  {
+    "timestamp": "2026-06-03 19:47:13",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\n#define T 10;\nvar alertFlag = 0;\n\nRobotArm() = start_weld -> ( (weld_done -> Stop) timeout[T] (alert{alertFlag=1;} -> reset{alertFlag=0;} -> Stop) );\nController() = Skip;\nSystem() = RobotArm() ||| Controller();\n\n#define alert_raised (alertFlag == 1);\n\n#assert System() deadlockfree;\n#assert System() reaches alert_raised;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> start_weld -> weld_done>\n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "#define T 10;\nvar alertFlag = 0;\n\nRobotArm() = start_weld -> ( (weld_done -> Skip) [] (alert{alertFlag=1;} -> reset{alertFlag=0;} -> Skip) );\nController() = Skip;\nSystem() = RobotArm() ||| Controller();\n\n#define alert_raised (alertFlag == 1);\n\n#assert System() deadlockfree;\n#assert System() reaches alert_raised;",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:47:13",
+    "processedCode": "#define T 10;\nvar alertFlag = 0;\n\nRobotArm() = start_weld -> ( (weld_done -> Skip) [] (alert{alertFlag=1;} -> reset{alertFlag=0;} -> Skip) );\nController() = Skip;\nSystem() = RobotArm() ||| Controller();\n\n#define alert_raised (alertFlag == 1);\n\n#assert System() deadlockfree;\n#assert System() reaches alert_raised;"
+  },
+  {
+    "timestamp": "2026-06-03 19:47:47",
+    "processedCode": "var x = -1;\nvar in_cs[4] = [0,0,0,0];\n#define IDLE -1;\n#define Delta 3;\n#define Epsilon 5;\n\nP(i) = noncritical_i -> tic -> {x=i;} -> tic -> Wait[Delta];\n       if (x == i) {\n           cs_i -> {in_cs[i]=1;} -> critical_i -> exit_i -> {x=IDLE; in_cs[i]=0;} -> P(i)\n       } else {\n           Wait[Epsilon]; P(i)\n       }\n\nSystem = P(0) ||| P(1) ||| P(2) ||| P(3);\n\n#define mutex ( (in_cs[0] + in_cs[1] + in_cs[2] + in_cs[3]) <= 1 );\n#define progress ( (in_cs[0]==1) || (in_cs[1]==1) || (in_cs[2]==1) || (in_cs[3]==1) );\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;"
+  },
+  {
+    "timestamp": "2026-06-03 19:49:07",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\nvar x = -1;\nvar in_cs[4] = [0,0,0,0];\n#define IDLE -1;\n#define Delta 3;\n#define Epsilon 5;\n\nP(i) = noncritical_i -> tic -> {x=i;} -> tic -> Wait[Delta];\n       if (x == i) {\n           cs_i -> {in_cs[i]=1;} -> critical_i -> exit_i -> {x=IDLE; in_cs[i]=0;} -> P(i)\n       } else {\n           Wait[Epsilon]; P(i)\n       }\n\nSystem = P(0) ||| P(1) ||| P(2) ||| P(3);\n\n#define mutex ( (in_cs[0] + in_cs[1] + in_cs[2] + in_cs[3]) <= 1 );\n#define progress ( (in_cs[0]==1) || (in_cs[1]==1) || (in_cs[2]==1) || (in_cs[3]==1) );\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;\n```\n\nMismatches:\n- Assertion: #assert System |= []mutex;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() |= [] mutex) is NOT valid.\nA counterexample is presented as follows.\n<init -> noncritical_i -> tic -> \u03c4 -> tic -> [Wait[3]] -> [if((x == 3))] -> cs_i -> \u03c4 -> critical_i -> exit\n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:50:08",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\nvar x = -1;\nvar in_cs[4] = [0,0,0,0];\n#define IDLE -1;\n#define Delta 3;\n#define Epsilon 5;\n\nP(i) = noncritical_i -> tic -> {x=i;} -> tic -> Wait[Delta];\n       if (x == i) {\n           cs_i -> {in_cs[i]=1;} -> critical_i -> exit_i -> {x=IDLE; in_cs[i]=0;} -> P(i)\n       } else {\n           Wait[Epsilon]; P(i)\n       }\n\nSystem = P(0) ||| P(1) ||| P(2) ||| P(3);\n\n#define mutex ( (in_cs[0] + in_cs[1] + in_cs[2] + in_cs[3]) <= 1 );\n#define progress ( (in_cs[0]==1) || (in_cs[1]==1) || (in_cs[2]==1) || (in_cs[3]==1) );\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;\n```\n\nMismatches:\n- Assertion: #assert System |= []mutex;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() |= [] mutex) is NOT valid.\nA counterexample is presented as follows.\n<init -> noncritical_i -> tic -> \u03c4 -> tic -> [Wait[3]] -> [if((x == 3))] -> cs_i -> \u03c4 -> critical_i -> exit\n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "```\nvar lock = 0;\nvar in_cs[4] = [0,0,0,0];\n\nP(i) = noncritical_i -> await(lock==0) {lock=1;} -> cs_i -> {in_cs[i]=1;} -> critical_i -> exit_i -> {lock=0; in_cs[i]=0;} -> P(i);\n\nSystem = P(0) ||| P(1) ||| P(2) ||| P(3);\n\n#define mutex ( (in_cs[0] + in_cs[1] + in_cs[2] + in_cs[3]) <= 1 );\n#define progress ( (in_cs[0]==1) || (in_cs[1]==1) || (in_cs[2]==1) || (in_cs[3]==1) );\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;\n```",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:50:08",
+    "processedCode": "var lock = 0;\nvar in_cs[4] = [0,0,0,0];\n\nP(i) = noncritical_i -> await(lock==0) {lock=1;} -> cs_i -> {in_cs[i]=1;} -> critical_i -> exit_i -> {lock=0; in_cs[i]=0;} -> P(i);\n\nSystem = P(0) ||| P(1) ||| P(2) ||| P(3);\n\n#define mutex ( (in_cs[0] + in_cs[1] + in_cs[2] + in_cs[3]) <= 1 );\n#define progress ( (in_cs[0]==1) || (in_cs[1]==1) || (in_cs[2]==1) || (in_cs[3]==1) );\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;"
+  },
+  {
+    "timestamp": "2026-06-03 19:51:17",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\nvar x = -1;\nvar in_cs[4] = [0,0,0,0];\n#define IDLE -1;\n#define Delta 3;\n#define Epsilon 5;\n\nP(i) = noncritical_i -> tic -> {x=i;} -> tic -> Wait[Delta];\n       if (x == i) {\n           cs_i -> {in_cs[i]=1;} -> critical_i -> exit_i -> {x=IDLE; in_cs[i]=0;} -> P(i)\n       } else {\n           Wait[Epsilon]; P(i)\n       }\n\nSystem = P(0) ||| P(1) ||| P(2) ||| P(3);\n\n#define mutex ( (in_cs[0] + in_cs[1] + in_cs[2] + in_cs[3]) <= 1 );\n#define progress ( (in_cs[0]==1) || (in_cs[1]==1) || (in_cs[2]==1) || (in_cs[3]==1) );\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;\n```\n\nMismatches:\n- Assertion: #assert System |= []mutex;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() |= [] mutex) is NOT valid.\nA counterexample is presented as follows.\n<init -> noncritical_i -> tic -> \u03c4 -> tic -> [Wait[3]] -> [if((x == 3))] -> cs_i -> \u03c4 -> critical_i -> exit\n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "var lock = false;\nvar in_cs[4] = [0,0,0,0];\n\nP(i) = noncritical_i -> [lock == false] { lock = true; } -> {in_cs[i]=1;} -> critical_i -> exit_i -> {lock = false; in_cs[i]=0;} -> P(i);\n\nSystem = P(0) ||| P(1) ||| P(2) ||| P(3);\n\n#define mutex ( (in_cs[0] + in_cs[1] + in_cs[2] + in_cs[3]) <= 1 );\n#define progress ( (in_cs[0]==1) || (in_cs[1]==1) || (in_cs[2]==1) || (in_cs[3]==1) );\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:51:17",
+    "processedCode": "var lock = false;\nvar in_cs[4] = [0,0,0,0];\n\nP(i) = noncritical_i -> [lock == false] { lock = true; } -> {in_cs[i]=1;} -> critical_i -> exit_i -> {lock = false; in_cs[i]=0;} -> P(i);\n\nSystem = P(0) ||| P(1) ||| P(2) ||| P(3);\n\n#define mutex ( (in_cs[0] + in_cs[1] + in_cs[2] + in_cs[3]) <= 1 );\n#define progress ( (in_cs[0]==1) || (in_cs[1]==1) || (in_cs[2]==1) || (in_cs[3]==1) );\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;"
+  },
+  {
+    "timestamp": "2026-06-03 19:51:47",
+    "processedCode": "#define Delta 3;\n#define Epsilon 5;\n\nvar var = -1;\nvar in_cs[4] = [0,0,0,0];\n\n#define cs0 (in_cs[0]==1);\n#define cs1 (in_cs[1]==1);\n#define cs2 (in_cs[2]==1);\n#define cs3 (in_cs[3]==1);\n#define mutex !(cs0 && cs1) && !(cs0 && cs2) && !(cs0 && cs3) && !(cs1 && cs2) && !(cs1 && cs3) && !(cs2 && cs3);\n#define progress (cs0); // liveness for process 0\n\nProcess(i) = setVar.i{var=i;in_cs[i]=0;} -> Wait[Delta];\n             Check(i);\n\nCheck(i) = [var==i] enter_cs.i{in_cs[i]=1;} -> exit_cs.i{in_cs[i]=0;var=-1;} -> Process(i)\n           [] [var!=i] retry.i{} -> Wait[Epsilon]; Process(i);\n\nSystem = Process(0) ||| Process(1) ||| Process(2) ||| Process(3);\n\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;"
+  },
+  {
+    "timestamp": "2026-06-03 19:52:14",
+    "processedCode": "#define Delta 3;\n#define Epsilon 5;\n\nvar x = -1;\nvar cs_users = 0;\n\nProcess(id) = set{x = id;} -> delta_tick -> Wait[Delta];\n              ifb(x == id) { enter_cs{cs_users = cs_users + 1;} -> critical_section -> leave_cs{cs_users = cs_users - 1; x = -1;} -> Process(id) }\n              else { Wait[Epsilon]; Process(id) };\n\nSystem = Process(0) ||| Process(1) ||| Process(2) ||| Process(3);\n\n#define mutex (cs_users <= 1);\n#define progress (cs_users > 0);\n\n#assert System deadlockfree;\n#assert System |= [] mutex;\n#assert System |= []<> progress;"
+  },
+  {
+    "timestamp": "2026-06-03 19:52:47",
+    "processedCode": "#define IDLE 0;\n#define TX0 1;\n#define TX1 2;\n#define mutex (medium != TX0 || medium != TX1);\n#define progress (medium != IDLE);\n\nvar medium = IDLE;\n\nNode0() = listen0 -> if (medium == IDLE) { start_tx0{medium = TX0;} -> Wait[3]; finish_tx0{medium = IDLE;} -> Node0() } else { backoff0 -> Wait[2]; Node0() };\nNode1() = listen1 -> if (medium == IDLE) { start_tx1{medium = TX1;} -> Wait[3]; finish_tx1{medium = IDLE;} -> Node1() } else { backoff1 -> Wait[4]; Node1() };\n\nSystem() = Node0() ||| Node1();\n\n#assert System() deadlockfree;\n#assert System() |= []mutex;\n#assert System() |= []<>progress;"
+  },
+  {
+    "timestamp": "2026-06-03 19:52:58",
+    "processedCode": "#define IDLE 0;\n#define TX0 1;\n#define TX1 2;\n\nvar medium = IDLE;\n\nNode0() = listen0 -> ([medium == IDLE] start_tx0{medium = TX0;} -> Wait[3]; finish_tx0{medium = IDLE;} -> Node0() [] [medium != IDLE] backoff0 -> Wait[2]; Node0());\n\nNode1() = listen1 -> ([medium == IDLE] start_tx1{medium = TX1;} -> Wait[3]; finish_tx1{medium = IDLE;} -> Node1() [] [medium != IDLE] backoff1 -> Wait[4]; Node1());\n\nSystem() = Node0() ||| Node1();\n\n#assert System() deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 19:53:08",
+    "processedCode": "#define IDLE 0;\n#define TX0 1;\n#define TX1 2;\n\nvar medium = IDLE;\n\nNode0() = ready0 -> listen0 ->\n  ([medium == IDLE] start_tx0{medium = TX0;} -> Wait[3]; finish_tx0{medium = IDLE;} -> Node0()\n   [] [medium != IDLE] backoff0 -> Wait[2]; Node0());\n\nNode1() = ready1 -> listen1 ->\n  ([medium == IDLE] start_tx1{medium = TX1;} -> Wait[3]; finish_tx1{medium = IDLE;} -> Node1()\n   [] [medium != IDLE] backoff1 -> Wait[4]; Node1());\n\nSystem() = Node0() ||| Node1();\n\n#assert System() deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 19:53:45",
+    "processedCode": "var approach_flag = false;\nvar gate_down = false;\nvar train_on_bridge = false;\n\nTrain() = approach{approach_flag = true;} -> delta ->\n          ifb(gate_down) { cross{train_on_bridge = true;} -> delta ->\n                           leave{train_on_bridge = false; approach_flag = false;} -> Train() };\n\nController() = ifb(approach_flag) { within[2] (lower_gate{gate_down = true;} -> delta -> Wait[2];\n                                       raise_gate{gate_down = false;} -> Controller()) };\n\nSystem() = Train() ||| Controller();\n\n#define safe (train_on_bridge == false) || (gate_down == true);\n\n#assert System() deadlockfree;\n#assert System() |= []safe;"
+  },
+  {
+    "timestamp": "2026-06-03 19:54:29",
+    "processedCode": "#define T 2;\nvar approaching = 0;\nvar gateDown = 0;\nvar trainCrossed = 0;\nvar inCross = 0;\n\nTrain() = train_approach{approaching = 1;} -> \n          ifb(gateDown == 1) { inCross = 1; -> train_cross{trainCrossed = 1;} -> inCross = 0; -> train_leave{approaching = 0;} -> Stop } -> Train();\n\nController() = ifb(approaching == 1) { (lower_event{gateDown = 1;} -> Stop) within[T] } -> \n              ifb(trainCrossed == 1) { raise_event{gateDown = 0; trainCrossed = 0;} -> Stop } -> Controller();\n\nSystem() = Train() ||| Controller();\n\n#define safe (inCross == 0 || (inCross == 1 && gateDown == 1));\n#assert System() deadlockfree;\n#assert System() |= []safe;"
+  },
+  {
+    "timestamp": "2026-06-03 19:54:51",
+    "processedCode": "#define gate_up (gate == 0)\n#define gate_down (gate == 1)\n#define train_idle (train_state == 0)\n#define train_approaching (train_state == 1)\n#define train_crossing (train_state == 2)\n#define train_leaving (train_state == 3)\n#define safe (train_state != 2 || gate != 0)\n\nvar gate = 0;\nvar train_state = 0;\n\nTrain() = approach{train_state = 1;} -> Wait[1];\n          [gate == 1] cross{train_state = 2;} -> Wait[2];\n          leave{train_state = 3;} -> Wait[1];\n          Train();\n\nController() = approach{skip;} -> lower_gate{gate = 1;} -> Wait[2];\n               raise_gate{gate = 0;} -> Wait[1];\n               Controller();\n\nSystem() = Train() ||| Controller();\n\n#define goal safe;\n#assert System() deadlockfree;\n#assert System() |= []safe;"
+  },
+  {
+    "timestamp": "2026-06-03 19:55:58",
+    "processedCode": "#define HEART_INTERVAL 5;\n#define PACEMAKER_TIMEOUT 2;\n\nHeart() = heart_beat -> Wait[HEART_INTERVAL]; Heart();\nPacemaker() = (heart_beat -> Pacemaker()) timeout[PACEMAKER_TIMEOUT] (pace_event -> Pacemaker());\nSystem() = Heart() || Pacemaker();\n\n#assert System deadlockfree;\n#assert System |= [](<>(heart_beat || pace_event));"
+  },
+  {
+    "timestamp": "2026-06-03 19:56:36",
+    "processedCode": "var async_sent = false;\n\nRing() = token_to_A -> token_to_B -> Ring();\n\nStationA() = receive_token_A -> ( send_sync -> Wait[2]; release_token_A -> StationA()\n                                 [] send_async -> Wait[1]; async_done{async_sent=true;} -> release_token_A -> StationA() );\n\nStationB() = receive_token_B -> send_sync_B -> Wait[2]; release_token_B -> StationB();\n\nSystem() = Ring() ||| StationA() ||| StationB();\n\n#define async_done (async_sent == true);\n\n#assert System deadlockfree;\n#assert System reaches async_done;"
+  },
+  {
+    "timestamp": "2026-06-03 19:57:01",
+    "processedCode": "var token_holder = 0;\nvar async_sent = false;\n\nRing() = Wait[1];\n        [token_holder == 0] token_move_to_B -> {token_holder = 1;} -> Ring()\n        [] [token_holder == 1] token_move_to_A -> {token_holder = 0;} -> Ring()\n        [] [token_holder == -1] token_reassign -> {token_holder = 0;} -> Ring();\n\nStationA() = ifb(token_holder == 0){\n               (send_syncA -> Wait[2]; sync_doneA -> {token_holder = -1;} -> StationA())\n               []\n               (send_asyncA -> Wait[1]; async_doneA -> {async_sent = true; token_holder = -1;} -> StationA())\n             };\n\nStationB() = ifb(token_holder == 1){\n               send_syncB -> Wait[2]; sync_doneB -> {token_holder = -1;} -> StationB()\n             };\n\nSystem() = Ring() ||| StationA() ||| StationB();\n\n#define async_completed (async_sent == true);\n#assert System() deadlockfree;\n#assert System() reaches async_completed;"
+  },
+  {
+    "timestamp": "2026-06-03 19:58:03",
+    "question": "The following PAT code has verification failures. Fix the code to satisfy all assertions.\n\nCurrent code:\n```\nvar token_holder = 0;\nvar async_sent = false;\n\nRing() = Wait[1];\n        [token_holder == 0] token_move_to_B -> {token_holder = 1;} -> Ring()\n        [] [token_holder == 1] token_move_to_A -> {token_holder = 0;} -> Ring()\n        [] [token_holder == -1] token_reassign -> {token_holder = 0;} -> Ring();\n\nStationA() = ifb(token_holder == 0){\n               (send_syncA -> Wait[2]; sync_doneA -> {token_holder = -1;} -> StationA())\n               []\n               (send_asyncA -> Wait[1]; async_doneA -> {async_sent = true; token_holder = -1;} -> StationA())\n             };\n\nStationB() = ifb(token_holder == 1){\n               send_syncB -> Wait[2]; sync_doneB -> {token_holder = -1;} -> StationB()\n             };\n\nSystem() = Ring() ||| StationA() ||| StationB();\n\n#define async_completed (async_sent == true);\n#assert System() deadlockfree;\n#assert System() reaches async_completed;\n```\n\nMismatches:\n- Assertion: #assert System() deadlockfree;\n  Expected: Valid, Got: Invalid\n  PAT output: The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> [ifb((token_holder == 0))] -> send_asyncA -> tock -> [Wait[0]] -> [Wait[0]] -> async_don\n\n\n\nGenerate corrected PAT code. Output ONLY code \u2014 no markdown, no explanations.\n### Response:",
+    "answerClaude": "```\nvar token_holder = 0;\nvar async_sent = false;\n\nRing() = Wait[1]; ( [token_holder == 0] token_move_to_B -> {token_holder = 1;} -> Ring()\n                  [] [token_holder == 1] token_move_to_A -> {token_holder = 0;} -> Ring()\n                  [] [token_holder == -1] token_reassign -> {token_holder = 0;} -> Ring() );\n\nStationA() = ifb(token_holder == 0){\n               (send_syncA -> Wait[2]; sync_doneA -> {token_holder = -1;} -> StationA())\n               []\n               (send_asyncA -> Wait[1]; async_doneA -> {async_sent = true; token_holder = -1;} -> StationA())\n             };\n\nStationB() = ifb(token_holder == 1){\n               send_syncB -> Wait[2]; sync_doneB -> {token_holder = -1;} -> StationB()\n             };\n\nSystem() = Ring() ||| StationA() ||| StationB();\n\n#define async_completed (async_sent == true);\n#assert System() deadlockfree;\n#assert System() reaches async_completed;\n```",
+    "PAT": ""
+  },
+  {
+    "timestamp": "2026-06-03 19:58:03",
+    "processedCode": "var token_holder = 0;\nvar async_sent = false;\n\nRing() = Wait[1]; ( [token_holder == 0] token_move_to_B -> {token_holder = 1;} -> Ring()\n                  [] [token_holder == 1] token_move_to_A -> {token_holder = 0;} -> Ring()\n                  [] [token_holder == -1] token_reassign -> {token_holder = 0;} -> Ring() );\n\nStationA() = ifb(token_holder == 0){\n               (send_syncA -> Wait[2]; sync_doneA -> {token_holder = -1;} -> StationA())\n               []\n               (send_asyncA -> Wait[1]; async_doneA -> {async_sent = true; token_holder = -1;} -> StationA())\n             };\n\nStationB() = ifb(token_holder == 1){\n               send_syncB -> Wait[2]; sync_doneB -> {token_holder = -1;} -> StationB()\n             };\n\nSystem() = Ring() ||| StationA() ||| StationB();\n\n#define async_completed (async_sent == true);\n#assert System() deadlockfree;\n#assert System() reaches async_completed;"
+  },
+  {
+    "timestamp": "2026-06-03 19:58:35",
+    "processedCode": "#define FLOOR1 1;\n#define FLOOR2 2;\n#define OPEN_TIME 3;\n#define MOVE_TIME 2;\n\nvar lift_floor = FLOOR1;\nvar button_pressed = 0;\n\nDoor() = open_door -> Wait[OPEN_TIME]; close_door -> Door();\n\nLiftCar() = ifb(button_pressed == 1) { move_floor{lift_floor = (lift_floor == FLOOR1 ? FLOOR2 : FLOOR1);} -> Wait[MOVE_TIME]; reset{button_pressed = 0;} -> LiftCar(); }\n           else { LiftCar(); };\n\nButton() = press_button{button_pressed = 1;} -> Button();\n\nSystem() = Door() ||| LiftCar() ||| Button();\n\n#define at_floor2 (lift_floor == FLOOR2);\n#define goal at_floor2;\n\n#assert System() deadlockfree;\n#assert System() reaches goal;"
+  },
+  {
+    "timestamp": "2026-06-03 19:58:47",
+    "processedCode": "#define FLOOR1 0;\n#define FLOOR2 1;\nvar lift_floor = FLOOR1;\nvar door_open = false;\nvar button_call = false;\n\nDoor() = open_door{door_open = true;} -> Wait[3]; close_door{door_open = false;} -> Door();\n\nLiftCar() = ifb(button_call) { move_start -> Wait[2]; lift_floor = (lift_floor == FLOOR1) ? FLOOR2 : FLOOR1; button_call = false; }; LiftCar();\n\nButton() = button_press{button_call = true;} -> Button();\n\nSystem() = Door() ||| LiftCar() ||| Button();\n\n#define at_floor2 (lift_floor == FLOOR2);\n\n#assert System() deadlockfree;\n#assert System() reaches at_floor2;"
+  },
+  {
+    "timestamp": "2026-06-03 19:59:09",
+    "processedCode": "enum {FLOOR1, FLOOR2};\nvar lift_floor = FLOOR1;\n\nDoor() = open_door -> Wait[3]; close_door -> Door();\nLiftCar() = [lift_floor==FLOOR1] press -> move_up -> Wait[2]; set_lift_floor{FLOOR2;} -> LiftCar()\n          [] [lift_floor==FLOOR2] press -> move_down -> Wait[2]; set_lift_floor{FLOOR1;} -> LiftCar();\nButton() = press -> Button();\nSystem() = Door() ||| LiftCar() ||| Button();\n#define at_floor2 (lift_floor == FLOOR2);\n#assert System() deadlockfree;\n#assert System() reaches at_floor2;"
+  },
+  {
+    "timestamp": "2026-06-03 21:32:53",
+    "processedCode": "var alarm = 0;\nSender() = heartbeat -> Wait[2]; Sender();\nMonitor() = (heartbeat -> Monitor()) timeout[5] (alarm_set{alarm = 1;} -> Monitor());\nSystem() = Sender() ||| Monitor();\n#define alarm_state (alarm == 1);\n#assert System() deadlockfree;\n#assert System() reaches alarm_state;"
+  },
+  {
+    "timestamp": "2026-06-03 21:33:08",
+    "processedCode": "#define on on;\n#define off off;\nLight() = on -> (Wait[3]; off -> (Wait[3]; Light()));\n#assert Light deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 21:33:13",
+    "processedCode": "Light() = on -> Wait[3]; off -> Wait[3]; Light();\n#assert Light() deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 21:34:01",
+    "processedCode": "var done = 0;\n\nCoffeeMaker = startBrew -> BrewProcess timeout[6] CleanupProcess;\n\nBrewProcess = doBrew -> Wait[4]; doneBrew -> Dispense -> Stop;\n\nCleanupProcess = doClean -> Wait[2]; set_done{done = 1;} -> Stop;\n\nTimer = Wait[6]; timer_expired -> Stop;\n\nSystem = CoffeeMaker ||| Timer;\n\n#define cleanup_done (done == 1);\n\n#assert System deadlockfree;\n\n#assert System reaches cleanup_done;"
+  },
+  {
+    "timestamp": "2026-06-03 21:35:09",
+    "processedCode": "var cleaned = 0;\n\nCoffeeMaker() = start_brew -> ( \n    ( (Wait[4]; dispense -> cancel_timer -> Stop) |~| (Wait[8]; Stop) ) \n    [] (timeout_signal -> cleanup{cleaned = 1;} -> Stop) \n);\n\nTimer() = start_brew -> ( (cancel_timer -> Stop) timeout[6] (timeout_signal -> Stop) );\n\nSystem() = CoffeeMaker() || Timer();\n\n#define goal (cleaned == 1);\n\n#assert System deadlockfree;\n#assert System reaches goal;"
+  },
+  {
+    "timestamp": "2026-06-03 21:35:52",
+    "processedCode": "#define IDLE 0;\n#define BREWING 1;\n#define DISPENSING 2;\n#define CLEANUP 3;\n#define DONE 4;\n\nvar state = IDLE;\n\nCoffeeMaker() = start_brew -> {state = BREWING;} -> \n   ( (Wait[4]; {state = DISPENSING;} -> dispense -> {state = IDLE;} -> Stop) \n      [] (Wait[10]; {state = DISPENSING;} -> dispense -> {state = IDLE;} -> Stop) ) \n   timeout[6] \n   ( {state = CLEANUP;} -> Wait[3]; {state = DONE;} -> cleanup_done -> Stop );\n\nTimer() = Stop;\n\nSystem() = CoffeeMaker() ||| Timer();\n\n#define cleanup_done (state == DONE);\n\n#assert System deadlockfree;\n#assert System reaches cleanup_done;"
+  },
+  {
+    "timestamp": "2026-06-03 21:36:10",
+    "processedCode": "#define walk_event walk;\n#define dont_walk_event dont_walk;\n\nCrosswalk() = walk -> Wait[4]; dont_walk -> Wait[8]; Crosswalk();\nSystem() = Crosswalk();\n\n#assert System deadlockfree;\n#assert System |= []<>walk;\n#assert System |= []<>dont_walk;"
+  },
+  {
+    "timestamp": "2026-06-03 21:36:21",
+    "processedCode": "var state = 0;\nCrosswalk() = walk -> Wait[4]; dont_walk -> Wait[8]; Crosswalk();\nSystem() = Crosswalk();\n#assert System deadlockfree;\n#assert System |= []<>walk;"
+  },
+  {
+    "timestamp": "2026-06-03 21:36:31",
+    "processedCode": "#define GREEN_DURATION 10;\n#define YELLOW_DURATION 3;\n#define RED_DURATION 10;\n\nvar phase = 0;\n\nLight() = set_green{phase = 0;} -> tick -> Wait[GREEN_DURATION];\n          set_yellow{phase = 1;} -> tick -> Wait[YELLOW_DURATION];\n          set_red{phase = 2;} -> tick -> Wait[RED_DURATION];\n          Light();\n\n#define green_active (phase == 0);\nSystem = Light();\n#assert System deadlockfree;\n#assert System |= []<>green_active;"
+  },
+  {
+    "timestamp": "2026-06-03 21:36:47",
+    "processedCode": "var paid = false;\nvar expired = false;\nvar violation_issued = false;\n\nMeter() = payment_accepted -> Wait[5]; set_expired{expired = true;} -> Stop;\n\nEnforcement() = ifb(expired) { Wait[2]; issue_violation{violation_issued = true;} -> Stop; }\n\nSystem() = Meter() ||| Enforcement();\n\n#define goal (violation_issued == true);\n#assert System() deadlockfree;\n#assert System() reaches goal;"
+  },
+  {
+    "timestamp": "2026-06-03 21:37:17",
+    "processedCode": "#define IDLE 0;\n#define PARKING 1;\n#define EXPIRED 2;\n\nvar state = IDLE;\nvar violation_issued = false;\n\nMeter() = ifb(state == IDLE) {\n    pay{violation_issued = false; state = PARKING;} -> \n    Wait[5]; \n    expire{state = EXPIRED;} -> \n    WaitForReset()\n};\n\nWaitForReset() = ifb(state == IDLE) {\n    Meter()\n};\n\nEnforcement() = ifb(state == EXPIRED) {\n    Wait[2]; \n    violation_event{violation_issued = true;} -> \n    reset{state = IDLE;} -> \n    Enforcement()\n};\n\nSystem() = Meter() ||| Enforcement();\n\n#define goal (violation_issued == true);\n#assert System() deadlockfree;\n#assert System() reaches goal;"
+  },
+  {
+    "timestamp": "2026-06-03 21:38:33",
+    "processedCode": "var ejected = 0;\n\nATM() = card_insert -> ( (pin_input -> process_transaction -> Stop) timeout[8] (card_ejected{ejected = 1;} -> Stop) );\n\nUser() = card_insert -> ( (pin_input -> Stop) timeout[10] Stop );\n\nSystem() = ATM() || User();\n\n#define card_ejected (ejected == 1);\n\n#assert System() deadlockfree;\n#assert System() reaches card_ejected;"
+  },
+  {
+    "timestamp": "2026-06-03 21:38:48",
+    "processedCode": "#define TIMEOUT 8;\n#define SHORT_DELAY 4;\n#define LONG_DELAY 9;\n\nenum {IDLE, CARD_IN, PIN_OK, EJECTED};\nvar state = IDLE;\n\n#define card_ejected (state == EJECTED);\n\nATM() = card_insert{state = CARD_IN;} -> \n        (\n          pin_input{state = PIN_OK;} -> done -> Stop\n        ) timeout[TIMEOUT] (\n          eject_card{state = EJECTED;} -> Stop\n        );\n\nUser() = card_insert -> \n         (\n           Wait[SHORT_DELAY]; pin_input -> Stop\n         )\n         []\n         (\n           Wait[LONG_DELAY]; pin_input -> Stop\n         );\n\nSystem() = ATM() || User();\n\n#define goal card_ejected;\n\n#assert System() deadlockfree;\n#assert System() reaches goal;"
+  },
+  {
+    "timestamp": "2026-06-03 21:39:15",
+    "processedCode": "var ejected = 0;\n#define TO 8;\n\nATM = card_insert -> ((pin_enter -> done -> Stop) timeout[TO] (card_ejected{ejected = 1;} -> Stop));\nUser = card_insert -> (pin_enter -> Stop [] Stop);\nSystem = ATM || User;\n\n#define card_ejected (ejected == 1);\n#assert System deadlockfree;\n#assert System reaches card_ejected;"
+  },
+  {
+    "timestamp": "2026-06-03 21:39:46",
+    "processedCode": "#define OPEN_DURATION 8;\n\nvar buttonPressed = false;\n\nDoor() = open -> tick -> Wait[OPEN_DURATION]; closing -> CheckClose();\n\nCheckClose() = [buttonPressed] reopen{buttonPressed = false;} -> tick -> Wait[OPEN_DURATION]; closing -> CheckClose()\n               [] [!buttonPressed] close -> Door();\n\nButton() = press{buttonPressed = true;} -> Button() [] tick -> Button();\n\nSystem = Door() ||| Button();\n\n#assert System deadlockfree;"
+  },
+  {
+    "timestamp": "2026-06-03 21:40:16",
+    "processedCode": "#define COOLING_TIMEOUT 3;\n#define SHUTDOWN_DEADLINE 5;\n\nenum {NORMAL, OVERHEAT, SHUTDOWN};\nvar state = NORMAL;\n\nReactor() = \n  [state == NORMAL] overheat{state = OVERHEAT;} -> Reactor()\n  [] [state == OVERHEAT] cooling{state = NORMAL;} -> Reactor()\n  [] [state == OVERHEAT] shutdown{state = SHUTDOWN;} -> Stop;\n\nSafetyMonitor() = \n  overheat -> \n    ( (cooling -> SafetyMonitor()) \n      timeout[COOLING_TIMEOUT] \n      ( (shutdown -> Stop) within[SHUTDOWN_DEADLINE] )\n    );\n\nSystem() = Reactor() || SafetyMonitor();\n\n#define shutdown_done (state == SHUTDOWN);\n\n#assert System() deadlockfree;\n#assert System() reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 21:40:47",
+    "processedCode": "var shutdown_flag = false;\n\nReactor() = normal_operate -> Reactor() [] overheat -> (cooling_on -> Reactor() [] emergency_shutdown{shutdown_flag = true;} -> shutdown_done -> Stop);\n\nSafetyMonitor() = overheat -> (\n  (cooling_on -> SafetyMonitor()) timeout[3] (\n    (emergency_shutdown -> Wait[0]; shutdown_done -> Stop) deadline[5]\n  )\n);\n\nSystem = Reactor || SafetyMonitor;\n\n#define done (shutdown_flag == true);\n\n#assert System deadlockfree;\n#assert System reaches done;"
+  },
+  {
+    "timestamp": "2026-06-03 21:41:19",
+    "processedCode": "#define NORM 0;\n#define OVER 1;\n#define SHUT 3;\nvar state = NORM;\n#define shutdown_done (state == SHUT);\n\nReactor() = [state == NORM] overheat{state = OVER;} -> Reactor()\n          [] [state == OVER] activate_cooling{state = NORM;} -> Reactor()\n          [] [state == OVER] emergency_shutdown{state = SHUT;} -> Stop;\n\nMonitor() = overheat{state = OVER;} -> (activate_cooling{state = NORM;} -> Monitor() timeout[3] (emergency_shutdown{state = SHUT;} -> Stop within[5]));\n\nSystem() = Reactor() || Monitor();\n\n#assert System deadlockfree;\n#assert System reaches shutdown_done;"
+  },
+  {
+    "timestamp": "2026-06-03 21:41:58",
+    "processedCode": "#define alert_raised (alert == 1);\nvar alert = 0;\n\nRobotArm() = start_weld -> (Wait[5]; weld_done -> Stop) [] (Wait[15]; weld_done -> Stop);\nController() = alert{alert=1;} -> reset -> Stop;\nSystem() = RobotArm() timeout[10] Controller();\n#assert System deadlockfree;\n#assert System reaches alert_raised;"
+  },
+  {
+    "timestamp": "2026-06-03 21:42:34",
+    "processedCode": "// === PAT RTS Code ===\n#define Delta 10;\n\nvar weld_done = 0;\nvar alert = 0;\n\n#define alert_raised (alert == 1);\n\nRobotArm() = start_weld -> ( (work; Wait[5]; weld_done{1} -> Stop) [] (work; Wait[15]; weld_done{1} -> Stop) );\n\nController() = Wait[Delta]; ( [weld_done == 0] alert{1} -> reset_event -> Stop [] [weld_done == 1] Stop );\n\nSystem() = RobotArm() ||| Controller();\n\n#assert System deadlockfree;\n#assert System reaches alert_raised;"
+  },
+  {
+    "timestamp": "2026-06-03 21:43:02",
+    "processedCode": "#define TIME 10;\nvar alerted = 0;\n#define alert_raised (alerted == 1);\n\nRobotArm() = start -> ( (weld -> done -> Stop) timeout[TIME] Controller() );\nController() = alert{alerted = 1;} -> reset -> Stop;\nSystem() = RobotArm();\n\n#assert System() deadlockfree;\n#assert System() reaches alert_raised;"
+  },
+  {
+    "timestamp": "2026-06-03 21:43:57",
+    "processedCode": "#define Delta 3;\n#define Epsilon 5;\n\nvar var = -1;\nvar in_cs[4] = [false, false, false, false];\n\nProcess(i) = set_var{ var = i; } -> delay_tick -> Wait[Delta];\n             Check(i);\n\nCheck(i) = [var == i] enter_cs.i{in_cs[i] = true;} -> exit_cs.i{in_cs[i] = false;} -> Process(i)\n           [] [var != i] retry.i -> delay_tick -> Wait[Epsilon]; Process(i);\n\nSystem = Process(0) ||| Process(1) ||| Process(2) ||| Process(3);\n\n#define mutex (!(in_cs[0] && (in_cs[1] || in_cs[2] || in_cs[3])));\n#define progress (<> (in_cs[0] == true));\n\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;"
+  },
+  {
+    "timestamp": "2026-06-03 21:44:32",
+    "processedCode": "#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<>progress;\n\n#define Delta 3;\n#define Epsilon 5;\nvar x = -1;\nvar cs_count = 0;\n\n#define mutex (cs_count <= 1);\n#define progress (cs_count == 0);\n\nProcess0() = set0{x=0;} -> tick -> Wait[Delta]; Check0();\nCheck0() = if (x == 0) { enter0{cs_count = cs_count + 1;} -> cs0 -> exit0{cs_count = cs_count - 1; x = -1;} -> Process0() } else { retry0 -> tick -> Wait[Epsilon]; Process0() };\n\nProcess1() = set1{x=1;} -> tick -> Wait[Delta]; Check1();\nCheck1() = if (x == 1) { enter1{cs_count = cs_count + 1;} -> cs1 -> exit1{cs_count = cs_count - 1; x = -1;} -> Process1() } else { retry1 -> tick -> Wait[Epsilon]; Process1() };\n\nProcess2() = set2{x=2;} -> tick -> Wait[Delta]; Check2();\nCheck2() = if (x == 2) { enter2{cs_count = cs_count + 1;} -> cs2 -> exit2{cs_count = cs_count - 1; x = -1;} -> Process2() } else { retry2 -> tick -> Wait[Epsilon]; Process2() };\n\nProcess3() = set3{x=3;} -> tick -> Wait[Delta]; Check3();\nCheck3() = if (x == 3) { enter3{cs_count = cs_count + 1;} -> cs3 -> exit3{cs_count = cs_count - 1; x = -1;} -> Process3() } else { retry3 -> tick -> Wait[Epsilon]; Process3() };\n\nSystem() = Process0() ||| Process1() ||| Process2() ||| Process3();"
+  },
+  {
+    "timestamp": "2026-06-03 21:44:45",
+    "processedCode": "var id_set = -1;\n\n#define Delta 3;\n#define Epsilon 5;\n\nSet(i) = set_var{i}{id_set = i;} -> Wait[Delta];\nCheck(i) = ifb(id_set == i) { enter_cs{i} -> exit_cs{i} -> Set(i); }\n           [] else { wait_retry{i} -> Wait[Epsilon]; Set(i); };\n\nProcess(i) = Set(i); Check(i);\n\nSystem = Process(0) ||| Process(1) ||| Process(2) ||| Process(3);\n\n#define mutex (entered0 + entered1 + entered2 + entered3 <= 1);\n#define entered0 (false);\n#define entered1 (false);\n#define entered2 (false);\n#define entered3 (false);\n\n#assert System deadlockfree;\n#assert System |= []mutex;\n#assert System |= []<> (enter_cs.0 || enter_cs.1 || enter_cs.2 || enter_cs.3);"
+  },
+  {
+    "timestamp": "2026-06-03 21:44:59",
+    "processedCode": "#define IDLE 0;\n#define TX0 1;\n#define TX1 2;\n\nvar medium = IDLE;\n\nNode0() = ready0 -> listen0 -> ([medium == IDLE] start_tx0{medium = TX0;} -> Wait[3]; finish_tx0{medium = IDLE;} -> Node0() [] [medium != IDLE] backoff0 -> Wait[2]; Node0());\n\nNode1() = ready1 -> listen1 -> ([medium == IDLE] start_tx1{medium = TX1;} -> Wait[3]; finish_tx1{medium = IDLE;} -> Node1() [] [medium != IDLE] backoff1 -> Wait[4]; Node1());\n\nSystem() = Node0() ||| Node1();\n#assert System() deadlockfree;\n#define mutex !(medium == TX0 && medium == TX1);\n#assert System() |= []mutex;"
+  },
+  {
+    "timestamp": "2026-06-03 21:45:44",
+    "processedCode": "enum {UP, DOWN};\nvar gate = UP;\nvar approached = false;\nvar crossing = false;\n\nTrain() = approach{approached=true;} -> \n          ifb(gate==DOWN) { cross{crossing=true;} -> leave{crossing=false; approached=false;} };\n          Train()\n\nController() = ifb(approached) { lower{gate=DOWN;} -> Wait[2]; raise{gate=UP;} };\n          Controller()\n\nSystem() = Train() ||| Controller()\n\n#define safe (! (crossing && gate==UP))\n\n#assert System deadlockfree\n#assert System |= [] safe"
+  },
+  {
+    "timestamp": "2026-06-03 21:45:58",
+    "processedCode": "var gate = 0; // 0=UP, 1=DOWN\nvar approaching = false;\nvar crossing = false;\n\nTrain() = approach{approaching = true;} -> \n          ifb(gate == 1) { cross{crossing = true;} -> leave{crossing = false;} -> Train() };\n\nController() = ifb(approaching == true) { \n                (gate_lower{gate = 1; approaching = false;} -> Wait[2]; gate_raise{gate = 0;} -> Controller())\n                within[2];\n              };\n\nSystem() = Train() ||| Controller();\n\n#define safe (gate==1 || !crossing);\n#assert System() deadlockfree;\n#assert System() |= []safe;"
+  },
+  {
+    "timestamp": "2026-06-03 21:46:34",
+    "processedCode": "var gate = 0;\nvar train_state = 0;\nvar approach_flag = 0;\n#define UP 0;\n#define DOWN 1;\n#define safety (train_state == 2 => gate == DOWN);\n\nTrain() = train_approach{train_state=1; approach_flag=1;} ->\n          ifb(gate == DOWN) { cross{train_state=2;} -> leave{train_state=3; approach_flag=0;} -> Train() };\n\nController() = ifb(approach_flag == 1) { lower{gate=DOWN;} -> Wait[2]; raise{gate=UP;} -> Controller() };\n\nSystem() = Train() ||| Controller();\n\n#assert System deadlockfree;\n#assert System |= []safety;"
+  },
+  {
+    "timestamp": "2026-06-03 21:47:50",
+    "processedCode": "#define BEAT_INTERVAL 5;\n#define TIMEOUT 2;\n\nHeart() = beat -> Wait[BEAT_INTERVAL]; Heart();\n\nPacemaker() = (beat -> Pacemaker()) timeout[TIMEOUT] (pace_deliver -> Pacemaker());\n\nSystem() = Heart() || Pacemaker();\n\n#assert System deadlockfree;\n#assert System |= []<>pace_deliver;"
+  },
+  {
+    "timestamp": "2026-06-03 21:48:20",
+    "processedCode": "var token = 0;\nvar async_sent = false;\n\nRing() = set token = 1; RingWaitA();\nRingWaitA() = ifb(token == 0) { set token = 2; RingWaitB(); };\nRingWaitB() = ifb(token == 0) { set token = 1; RingWaitA(); };\n\nStationA() = ifb(token == 1) {\n   (sync_A -> Wait[2]; set token = 0; StationA()\n    [] async_A -> Wait[1]; set async_sent = true; set token = 0; StationA())\n};\n\nStationB() = ifb(token == 2) {\n   sync_B -> Wait[2]; set token = 0; StationB()\n};\n\nSystem() = Ring() ||| StationA() ||| StationB();\n\n#define async_done (async_sent == true);\n#assert System deadlockfree;\n#assert System reaches async_done;"
+  },
+  {
+    "timestamp": "2026-06-03 21:49:01",
+    "processedCode": "var token_holder = 0;\nvar async_sent = false;\n\n#define async_done (async_sent == true)\n\nStationA() = \n  ifb(token_holder == 0) {\n    sync_A -> Wait[2]; sync_send_A{token_holder = 1;} -> StationA()\n    [] async_A -> Wait[1]; async_send_A{async_sent = true; token_holder = 1;} -> StationA()\n  };\n\nStationB() = \n  ifb(token_holder == 1) {\n    sync_B -> Wait[2]; sync_send_B{token_holder = 0;} -> StationB()\n  };\n\nRing() = Stop;\n\nSystem() = StationA() ||| StationB() ||| Ring();\n\n#assert System() deadlockfree;\n#assert System() reaches async_done;"
+  },
+  {
+    "timestamp": "2026-06-03 21:49:40",
+    "processedCode": "#define goal (async_sent == true);\nvar token_holder = 0;\nvar next_target = 1;\nvar async_sent = false;\n\nStationA() = ifb(token_holder == 0) {\n    ( sync_send -> Wait[2]; sync_done -> {token_holder = -1;} -> StationA()\n    [] async_send -> Wait[1]; async_done -> {token_holder = -1; async_sent = true;} -> StationA() )\n};\n\nStationB() = ifb(token_holder == 1) {\n    sync_send -> Wait[2]; sync_done -> {token_holder = -1;} -> StationB()\n};\n\nRing() = ifb(token_holder == -1) {\n    Wait[1]; pass_token{next_target = 1 - next_target; token_holder = next_target;} -> Ring()\n};\n\nSystem() = StationA() ||| StationB() ||| Ring();\n\n#assert System() deadlockfree;\n#assert System() reaches goal;"
+  },
+  {
+    "timestamp": "2026-06-03 21:50:10",
+    "processedCode": "#define FLOOR1 0;\n#define FLOOR2 1;\n\nvar lift_floor = FLOOR1;\nvar button_pressed = false;\n\nDoor() = open_door -> Wait[3];\n         close_door -> Door();\n\nLiftCar() = idle -> [button_pressed == true] start_move -> Wait[2];\n            arrive{lift_floor = (lift_floor == FLOOR1 ? FLOOR2 : FLOOR1); button_pressed = false;} -> LiftCar();\n\nButton() = press -> {button_pressed = true;} -> Wait[1];\n            Button();\n\nSystem() = Door() ||| LiftCar() ||| Button();\n\n#define at_floor2 (lift_floor == FLOOR2);\n\n#assert System() deadlockfree;\n#assert System() reaches at_floor2;"
+  },
+  {
+    "timestamp": "2026-06-03 21:50:34",
+    "processedCode": "enum {FLOOR1, FLOOR2};\n\nvar lift_floor = FLOOR1;\nvar button_pressed = 0;\n\nDoor() = open_door -> Wait[3]; close_door -> Door();\n\nButton() = press_button{button_pressed=1;} -> Wait[1]; Button();\n\nLiftCar() = ifb(button_pressed==1) { move_start{button_pressed=0;} -> Wait[2]; set_floor{lift_floor = (lift_floor==FLOOR1?FLOOR2:FLOOR1);} -> LiftCar(); };\n\nSystem() = Door() ||| LiftCar() ||| Button();\n\n#define at_floor2 (lift_floor == FLOOR2);\n\n#assert System() deadlockfree;\n#assert System() reaches at_floor2;"
+  },
+  {
+    "timestamp": "2026-06-03 21:51:00",
+    "processedCode": "#define FLOOR1 0\n#define FLOOR2 1\n\nvar lift_floor = FLOOR1;\nvar button_pressed = 0;\n\nDoor() = door_open -> Wait[3]; door_close -> Door();\n\nLiftCar() = ifb(button_pressed == 1)\n            { moving -> Wait[2]; arrived{lift_floor = (lift_floor == FLOOR1 ? FLOOR2 : FLOOR1); button_pressed = 0;} -> Skip }\n            ; LiftCar();\n\nButton() = press{button_pressed = 1} -> Button();\n\nSystem() = Door ||| LiftCar ||| Button;\n\n#define at_floor2 (lift_floor == FLOOR2)\n\n#assert System() deadlockfree;\n#assert System() reaches at_floor2;"
+  }
+]

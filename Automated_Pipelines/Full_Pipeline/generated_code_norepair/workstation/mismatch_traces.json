@@ -1,0 +1,9 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "trace": "<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> timeoutOccurred -> [ifb((weldingStatus == WELDING_TIMEOUT))] -> alertEvent -> resetWeld -> startWeld -> tock -> tock -> tock -> tock -> tock -> resetWeld -> [Wait[0]] -> finishWeld>",
+    "current_result": "Invalid",
+    "desired_result": "Valid",
+    "pat_error": "The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> timeoutOccurred -> [ifb((weldingStatus == WELDING_TIMEOUT))] -> alertEvent -> resetWeld -> startWeld -> tock -> tock -> tock -> tock -> tock -> resetWeld -> [Wait[0]] -> finishWeld>"
+  }
+]

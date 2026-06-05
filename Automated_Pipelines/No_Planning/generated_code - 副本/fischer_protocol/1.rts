@@ -1,0 +1,15 @@
+#define Delta 3;
+#define Epsilon 5;
+
+var x = -1;
+var cs_users = 0;
+
+Process(id) = set{x = id;} -> delta_tick -> Wait[Delta];
+              ifb(x == id) { enter_cs{cs_users = cs_users + 1;} -> critical_section -> leave_cs{cs_users = cs_users - 1; x = -1;} -> Process(id) }
+              else { Wait[Epsilon]; Process(id) };
+
+System = Process(0) ||| Process(1) ||| Process(2) ||| Process(3);
+
+#define mutex (cs_users <= 1);
+#define progress (cs_users > 0);
+#assert System |= [] mutex;

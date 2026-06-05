@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert lift_system deadlockfree;",
+    "patResult": "The Assertion (lift_system() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert lift_system reaches at_floor2;",
+    "patResult": "The Assertion (lift_system() reaches at_floor2) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> press -> [ifb((buttonState == BUTTON_PRESSED))] -> startMove -> tock -> tock -> [Wait[0]] -> press -> arrive>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

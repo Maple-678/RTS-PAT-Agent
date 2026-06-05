@@ -1,0 +1,15 @@
+#define HEARTBEAT_INTERVAL 5;
+#define STOPPED 0;
+#define BEATING 1;
+#define PACEMAKER_DELAY 2;
+
+var heartState = BEATING;
+var timeSinceLastBeat = 0;
+
+Heart() = Wait[HEARTBEAT_INTERVAL]; beat{heartState = BEATING; timeSinceLastBeat = 0;} -> Heart();
+
+Pacemaker() = Wait[1]; tick_event{timeSinceLastBeat = timeSinceLastBeat + 1;} -> if (timeSinceLastBeat >= PACEMAKER_DELAY) { deliver_pace{heartState = BEATING; timeSinceLastBeat = 0;} -> Pacemaker() } else { Pacemaker() };
+
+System = Heart() ||| Pacemaker();
+
+#assert System deadlockfree;

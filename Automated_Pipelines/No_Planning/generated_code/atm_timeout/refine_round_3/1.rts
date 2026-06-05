@@ -1,0 +1,8 @@
+var ejected = false;
+#define card_ejected_state (ejected == true);
+
+ATM() = card_insert -> (pin_input -> transaction -> ATM()) timeout[8] (card_ejected{ejected = true;} -> ATM());
+User() = card_insert -> (pin_input -> User()) timeout[9] User();
+System() = ATM() || User();
+
+#assert System() reaches card_ejected_state;

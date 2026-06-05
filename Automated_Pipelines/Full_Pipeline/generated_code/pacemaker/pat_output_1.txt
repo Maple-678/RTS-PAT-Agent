@@ -1,0 +1,17 @@
+=======================================================
+Assertion: System() |= []<> beating
+********Verification Result********
+The Assertion (System() |= []<> beating) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search with Zone Abstraction
+
+
+********Verification Statistics********
+Visited States:34
+Total Transitions:60
+Time Used:0.0462182s
+Estimated Memory Used:41411.184KB
+
+

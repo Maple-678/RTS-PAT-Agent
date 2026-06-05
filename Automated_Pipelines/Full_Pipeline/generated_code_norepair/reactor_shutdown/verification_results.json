@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert reactor_shutdown() deadlockfree;",
+    "patResult": "The Assertion (reactor_shutdown() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> overheat -> \u03c4 -> \u03c4 -> tock -> tock -> tock -> [timeout[0]] -> emergency_shutdown -> \u03c4>",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert reactor_shutdown() reaches shutdown_done;",
+    "patResult": "The Assertion (reactor_shutdown() reaches shutdown_done) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> overheat -> \u03c4 -> [timeout[3]] -> \u03c4 -> emergency_shutdown -> \u03c4>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

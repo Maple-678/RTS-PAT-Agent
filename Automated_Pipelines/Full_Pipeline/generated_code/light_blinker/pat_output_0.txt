@@ -1,0 +1,18 @@
+=======================================================
+Assertion: Light() deadlockfree
+********Verification Result********
+The Assertion (Light() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:4
+Total Transitions:4
+Time Used:0.016225s
+Estimated Memory Used:8552.664KB
+
+

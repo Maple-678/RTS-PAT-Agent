@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert parking_meter deadlockfree;",
+    "trace": "<init -> pay -> \u03c4>",
+    "current_result": "Invalid",
+    "desired_result": "Valid"
+  },
+  {
+    "assertion": "#assert parking_meter reaches violation_issued;",
+    "trace": "<init>",
+    "current_result": "Invalid",
+    "desired_result": "Valid"
+  }
+]

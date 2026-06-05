@@ -1,0 +1,8 @@
+[
+  {
+    "assertion": "#assert elevator_door deadlockfree;",
+    "patResult": "The Assertion (elevator_door() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

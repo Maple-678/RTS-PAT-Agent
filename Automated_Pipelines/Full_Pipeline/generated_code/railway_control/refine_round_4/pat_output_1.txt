@@ -1,0 +1,20 @@
+=======================================================
+Assertion: System() |= [] safe
+********Verification Result********
+The Assertion (System() |= [] safe) is NOT valid.
+A counterexample is presented as follows.
+<init -> train_approach -> [ifb((trainPosition == TRAIN_APPROACHING))] -> gate_lower -> tock -> [Wait[0]] -> gate_tick1 -> tock -> [Wait[0]] -> gate_tick0 -> train_wait -> tock -> [Wait[0]] -> train_cross -> train_leave -> [ifb((trainPosition == TRAIN_LEFT))] -> train_far -> train_approach -> train_wait -> tock -> [Wait[0]] -> train_cross -> gate_raise>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using BFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:25
+Total Transitions:43
+Time Used:0.0612221s
+Estimated Memory Used:8800.416KB
+
+

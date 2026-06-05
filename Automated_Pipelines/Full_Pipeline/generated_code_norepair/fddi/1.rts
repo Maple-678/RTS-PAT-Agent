@@ -1,0 +1,61 @@
+#define NUM_STATIONS 2;
+#define SYNC_TICK_DURATION 2;
+#define ASYNC_TICK_DURATION 1;
+#define STATION_A_ID 0;
+#define STATION_B_ID 1;
+
+var tokenHolder = STATION_A_ID;
+var stationA_timer = 0;
+var stationB_timer = 0;
+var async_sent = false;
+
+/* Ring process: waits until current token holder finishes transmission, then passes token */
+Ring() = 
+  ifb ((tokenHolder == STATION_A_ID && stationA_timer == 0) || (tokenHolder == STATION_B_ID && stationB_timer == 0)) {
+    if (tokenHolder == STATION_A_ID) {
+      pass_token_A_to_B{tokenHolder = STATION_B_ID;} -> Ring()
+    } else {
+      pass_token_B_to_A{tokenHolder = STATION_A_ID;} -> Ring()
+    }
+  };
+
+/* Station A: sends sync (2 ticks) and async (1 tick) messages */
+StationA_idle() = 
+  [tokenHolder == STATION_A_ID && stationA_timer == 0] (
+    start_sync_a{stationA_timer = SYNC_TICK_DURATION;} -> StationA_sending()
+    []
+    start_async_a{stationA_timer = ASYNC_TICK_DURATION; async_sent = true;} -> StationA_sending()
+  )
+  [] (Wait[1]; StationA_idle());
+
+StationA_sending() = 
+  if (stationA_timer > 0) {
+    Wait[1];
+    dec_timer_a{stationA_timer = stationA_timer - 1;} -> StationA_sending()
+  } else {
+    StationA_idle()
+  };
+
+StationA() = StationA_idle();
+
+/* Station B: sends sync messages (2 ticks) */
+StationB_idle() = 
+  [tokenHolder == STATION_B_ID && stationB_timer == 0] (
+    start_sync_b{stationB_timer = SYNC_TICK_DURATION;} -> StationB_sending()
+  )
+  [] (Wait[1]; StationB_idle());
+
+StationB_sending() = 
+  if (stationB_timer > 0) {
+    Wait[1];
+    dec_timer_b{stationB_timer = stationB_timer - 1;} -> StationB_sending()
+  } else {
+    StationB_idle()
+  };
+
+StationB() = StationB_idle();
+
+System = Ring() ||| StationA() ||| StationB();
+
+#define async_done (async_sent == true);
+#assert System reaches async_done;

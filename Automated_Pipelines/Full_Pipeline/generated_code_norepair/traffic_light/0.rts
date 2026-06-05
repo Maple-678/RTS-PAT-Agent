@@ -1,0 +1,18 @@
+#define PHASE_GREEN 0;
+#define PHASE_YELLOW 1;
+#define PHASE_RED 2;
+#define GREEN_DURATION 30;
+#define YELLOW_DURATION 5;
+#define RED_DURATION 30;
+
+var currentPhase = PHASE_GREEN;
+
+Light() = green_on{currentPhase = PHASE_GREEN;} -> Wait[GREEN_DURATION];
+          yellow_on{currentPhase = PHASE_YELLOW;} -> Wait[YELLOW_DURATION];
+          red_on{currentPhase = PHASE_RED;} -> Wait[RED_DURATION];
+          Light();
+
+#define green_active (currentPhase == PHASE_GREEN);
+System = Light();
+
+#assert System deadlockfree;

@@ -1,0 +1,21 @@
+{
+    "codegen-time_2026-06-03-19-31-26": {
+        "runTime": 11.1165276
+    },
+    "verification-time_2026-06-03-19-31-27": {
+        "runTime": 1.2900473000000012,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-36-10": {
+        "runTime": 12.7737045
+    },
+    "codegen-time_2026-06-03-21-36-21": {
+        "runTime": 11.3208038
+    },
+    "verification-time_2026-06-03-21-36-23": {
+        "runTime": 1.1181095000000028,
+        "hasMismatch": false,
+        "codegenFailed": false
+    }
+}

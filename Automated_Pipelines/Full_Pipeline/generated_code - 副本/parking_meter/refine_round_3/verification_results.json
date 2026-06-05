@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert parking_meter deadlockfree;",
+    "patResult": "The Assertion (parking_meter() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert parking_meter reaches violation_issued;",
+    "patResult": "The Assertion (parking_meter() reaches violation_issued) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> pay -> \u03c4 -> tick -> [Wait[5]] -> expire -> \u03c4 -> enforceTick -> [Wait[2]] -> issueViolation -> \u03c4>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

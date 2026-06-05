@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert coffee_brew deadlockfree;",
+    "patResult": "The Assertion (coffee_brew() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert coffee_brew reaches cleanup_done;",
+    "patResult": "The Assertion (coffee_brew() reaches cleanup_done) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> start_brew -> tock -> tock -> tock -> tock -> tock -> tock -> [Wait[0]] -> start_brew -> tock -> tock -> tock -> tock -> [Wait[0]] -> tock -> tock -> [timeout[0]] -> timeout_event -> start_brew -> timeout_event>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

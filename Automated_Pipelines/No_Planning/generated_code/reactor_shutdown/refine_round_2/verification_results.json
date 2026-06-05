@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "Verification result not found",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() reaches shutdown_done;",
+    "patResult": "Verification result not found",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  }
+]

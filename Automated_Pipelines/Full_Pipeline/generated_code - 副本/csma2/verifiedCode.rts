@@ -1,0 +1,18 @@
+#define CHANNEL_IDLE 0;
+#define TX0 1;
+#define TX1 2;
+#define TRANSMIT_TICKS 3;
+#define BACKOFF_TICKS_NODE0 2;
+#define BACKOFF_TICKS_NODE1 4;
+
+var channelState = CHANNEL_IDLE;
+
+Node0() = ready0 -> listen0 -> ([channelState == CHANNEL_IDLE] start_tx0{channelState = TX0;} -> tick -> Wait[TRANSMIT_TICKS]; finish_tx0{channelState = CHANNEL_IDLE;} -> Node0() [] [channelState != CHANNEL_IDLE] backoff0 -> tick -> Wait[BACKOFF_TICKS_NODE0]; Node0());
+
+Node1() = ready1 -> listen1 -> ([channelState == CHANNEL_IDLE] start_tx1{channelState = TX1;} -> tick -> Wait[TRANSMIT_TICKS]; finish_tx1{channelState = CHANNEL_IDLE;} -> Node1() [] [channelState != CHANNEL_IDLE] backoff1 -> tick -> Wait[BACKOFF_TICKS_NODE1]; Node1());
+
+System() = Node0() ||| Node1();
+
+#assert System() deadlockfree;
+#define no_collision (channelState == CHANNEL_IDLE || channelState == TX0 || channelState == TX1);
+#assert System() |= []no_collision;

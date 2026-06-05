@@ -1,0 +1,22 @@
+var token_holder = 0;
+var async_sent = false;
+
+Ring() = Wait[1];
+        [token_holder == 0] token_move_to_B -> {token_holder = 1;} -> Ring()
+        [] [token_holder == 1] token_move_to_A -> {token_holder = 0;} -> Ring()
+        [] [token_holder == -1] token_reassign -> {token_holder = 0;} -> Ring();
+
+StationA() = ifb(token_holder == 0){
+               (send_syncA -> Wait[2]; sync_doneA -> {token_holder = -1;} -> StationA())
+               []
+               (send_asyncA -> Wait[1]; async_doneA -> {async_sent = true; token_holder = -1;} -> StationA())
+             };
+
+StationB() = ifb(token_holder == 1){
+               send_syncB -> Wait[2]; sync_doneB -> {token_holder = -1;} -> StationB()
+             };
+
+System() = Ring() ||| StationA() ||| StationB();
+
+#define async_completed (async_sent == true);
+#assert System() deadlockfree;

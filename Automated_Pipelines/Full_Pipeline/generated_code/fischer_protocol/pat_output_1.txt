@@ -1,0 +1,18 @@
+=======================================================
+Assertion: System() |= [] safe
+********Verification Result********
+The Assertion (System() |= [] safe) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using BFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:445
+Total Transitions:924
+Time Used:0.0594076s
+Estimated Memory Used:9276.928KB
+
+

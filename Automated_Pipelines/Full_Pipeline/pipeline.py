@@ -47,7 +47,7 @@ client_code = OpenAI(
 def get_LLM_answers(question, context, history):
     if question:
         try:
-            # Get model response (DeepSeek-V4-Flash with thinking)
+            # Get model response (DeepSeek-V4-pro with thinking)
             completion = client.chat.completions.create(
                 model="deepseek-v4-flash",
                 messages=[
@@ -86,14 +86,14 @@ def get_LLM_answers(question, context, history):
             else:
                 msg_history_path = './history/history.json'
             try:
-                with open(msg_history_path, 'r') as file:
+                with open(msg_history_path, 'r', encoding='utf-8') as file:
                     history = json.load(file)
             except FileNotFoundError:
                 history = []
 
             history.append(interaction)
 
-            with open(msg_history_path, 'w') as file:
+            with open(msg_history_path, 'w', encoding='utf-8') as file:
                 json.dump(history, file, indent=4)
             
             return interaction
@@ -105,7 +105,7 @@ def save_run_time(model_name, stage,run_time, hasMismatch=None, codegenFailed=No
     # Make sure the directory exists
     os.makedirs('./run_time_record', exist_ok=True)
     try:
-        with open(run_time_record_path, 'r') as file:
+        with open(run_time_record_path, 'r', encoding='utf-8') as file:
             run_time_data = json.load(file)
     except FileNotFoundError:
         print("File not found. Creating a new one.")
@@ -120,10 +120,48 @@ def save_run_time(model_name, stage,run_time, hasMismatch=None, codegenFailed=No
     run_time_data[stage] = save_content
 
     # Save back to file
-    with open(run_time_record_path, 'w') as file:
+    with open(run_time_record_path, 'w', encoding='utf-8') as file:
         json.dump(run_time_data, file, indent=4)
 
     return {"message": "Run time saved successfully."}
+
+
+def _get_target_module(structured_data):
+    target_module = (structured_data.get('targetModule') or 'csp').strip().lower()
+    if target_module not in {'csp', 'rts'}:
+        target_module = 'csp'
+    return target_module
+
+
+def _get_module_file_extension(target_module):
+    if target_module == 'rts':
+        return 'rts'
+    return 'csp'
+
+
+def _get_module_resources(target_module):
+    if target_module == 'rts':
+        return {
+            'rag_path': './database-rag-rts.json',
+            'syntax_path': './syntax-dataset-rt.json',
+            'syntax_section': None
+        }
+    return {
+        'rag_path': './database-rag-claude.json',
+        'syntax_path': './syntax-dataset.json',
+        'syntax_section': None
+    }
+
+
+def _load_time_constraints_from_history():
+    try:
+        with open('./history/time-constraints.json', 'r', encoding='utf-8') as f:
+            history_data = json.load(f)
+        if history_data:
+            return history_data[-1].get('answerGPT', '{}')
+    except Exception:
+        pass
+    return '{}'
 
 
 
@@ -187,6 +225,59 @@ Please ensure your response is a valid JSON string that can be parsed directly."
     end = time.perf_counter()
     run_time = end - start
     save_run_time(structuredData['modelName'], 'const-var-time', run_time)
+
+
+def gen_time_constraints(structured_data):
+    model_name = structured_data.get('modelName', 'unknown_model')
+    processes = json.dumps(structured_data.get('subsystems', []), indent=2, ensure_ascii=False)
+    model_desc = structured_data.get('modelDesc', '')
+
+    prompt = f"""As an expert in real-time systems and timed automata, analyze the following system description and extract all timing-related information.
+
+System Description: {model_desc}
+
+Processes:
+{processes}
+
+Extract the following:
+1. Clock variables that may be needed
+2. Timing bounds (deadline/timeout/within/period)
+3. Urgent or committed states if implied
+4. State invariants with explicit comparisons
+5. Clock resets tied to actions
+
+Output in JSON format:
+{{
+  "clocks": [{{"name": "x", "type": "local", "description": "timer"}}],
+  "timeConstraints": [{{"description": "response within 3", "type": "upper_bound", "bound": 3, "trigger": "event_a", "response": "event_b"}}],
+  "urgentStates": [{{"state": "S", "process": "P", "reason": "immediate response"}}],
+  "invariants": [{{"state": "S", "process": "P", "condition": "x <= 5"}}],
+  "clockResets": [{{"action": "start", "clock": "x", "resetTo": 0}}]
+}}
+
+Requirements:
+- Keep values machine-readable
+- Use explicit numeric bounds
+- If unavailable, return empty arrays
+"""
+
+    start = time.perf_counter()
+    print(f"getting time constraints for {model_name}")
+    interaction = get_LLM_answers(prompt, structured_data, 'skip')
+    end = time.perf_counter()
+
+    try:
+        with open('./history/time-constraints.json', 'r', encoding='utf-8') as f:
+            existing = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        existing = []
+
+    if interaction:
+        existing.append(interaction)
+        with open('./history/time-constraints.json', 'w', encoding='utf-8') as f:
+            json.dump(existing, f, indent=2, ensure_ascii=False)
+
+    save_run_time(model_name, 'time-constraint-time', end - start)
 
 def _generate_descriptions_for_actions_helper(structured_data):
     modelName = structured_data.get('modelName', 'N/A')
@@ -364,10 +455,20 @@ def _process_assertions_for_nl_helper(structured_data, assertions_list):
                 cond_str = " and ".join(cond_str_parts) if cond_str_parts else "no conditions provided"
                 nl_annotations_assertion.append(f"// define {stateName if stateName else '{stateName}'}: {cond_str}")
                 nl_annotations_assertion.append(f"// assert that the {sys_or_process} will {ltl_logic} reach the state \"{stateName}\"")
+        elif assertion_type == "tctl":
+            tctl_formula = assertion_item.get("tctlFormula", "").strip()
+            custom_desc = assertion_item.get("customDescription", "").strip()
+            if tctl_formula:
+                nl_annotations_assertion.append(f"// timed assertion (TCTL-like): {tctl_formula}")
+            if custom_desc:
+                nl_annotations_assertion.append(f"// timed requirement: {custom_desc}")
+            nl_annotations_assertion.append(f"// encode a PAT-verifiable timed property for the {sys_or_process} consistent with the timed requirement above")
                 
     return "\n".join(nl_annotations_assertion)
 
-def gen_nl_instructions(structured_data, const_answer_str, action_answer_str, assertions_list):
+
+
+def gen_nl_instructions(structured_data, const_answer_str, action_answer_str, assertions_list, time_constraints_text=""):
     start_time = time.perf_counter()
     
     # Part 1: NL for Constants
@@ -393,27 +494,42 @@ def gen_nl_instructions(structured_data, const_answer_str, action_answer_str, as
     except Exception as e:
         print(f"Error in generating NL for constants: {str(e)}")
 
-    # Part 2: NL for Actions
+    # Part 2: NL for Actions (CSP only; skipped for RTS)
     data2_content = ""
-    try:
+    target_module = _get_target_module(structured_data)
+
+    if target_module == 'rts':
+        # RTS: skip CSP action extraction — use system description directly
+        data2_content = "// === System Behavior (Timed) ===\n"
+        data2_content += f"// {structured_data.get('modelDesc', '')}\n"
+        for sub in structured_data.get('subsystems', []):
+            data2_content += f"// Process {sub.get('name', '')}: {sub.get('description', '')}\n"
+        tc_items = structured_data.get('timeConstraints', [])
+        if tc_items:
+            data2_content += "// Timing requirements:\n"
+            for tc in tc_items[:5]:
+                data2_content += f"// - {tc.get('description', '')}\n"
+    else:
+        # CSP: original action NL pipeline
         try:
-            parsed_action_data = json.loads(action_answer_str)
-            info_action = json.dumps(parsed_action_data)
+            try:
+                parsed_action_data = json.loads(action_answer_str)
+                info_action = json.dumps(parsed_action_data)
+            except json.JSONDecodeError:
+                parsed_action_data = action_answer_str
+                info_action = action_answer_str
+
+            prompt2 = f"""According to the following json data, please generate the NL annotation for PAT code generation. For each process, start the annotation with an annotation line // Definition of the "process_name" subsystem. (if any variable is involved in the process, please also add the description like: for xxx with index i). To annotate the actions that can happen in processes, we specify the conditions, action name, and the changes that the action introduces for the variables. For example, an annotation might be: //if "owner[i]" is "far", the action "towards.i" makes "owner[i]" become "near" (owner approaches the car). Note that, when processing conditions, if "complex_composite_conditions" exists as a key, its value alone forms the condition and should be directly described without mentioning "complex_composite_conditions". For other entries in conditions, the key and value together form the condition. Now please generate the NL annotations for each process in the json data, ensuring that the annotation for each action will span a new row. The json data is as follows:\n{info_action}"""
+
+            data2_interaction = get_LLM_answers(prompt2, parsed_action_data, 'skip')
+            if data2_interaction and 'answerGPT' in data2_interaction:
+                data2_content = data2_interaction['answerGPT']
+            else:
+                print("Error: Failed to get NL for actions or answerGPT missing.")
         except json.JSONDecodeError:
-            parsed_action_data = action_answer_str
-            info_action = action_answer_str
-        
-        prompt2 = f"""According to the following json data, please generate the NL annotation for PAT code generation. For each process, start the annotation with an annotation line // Definition of the "process_name" subsystem. (if any variable is involved in the process, please also add the description like: for xxx with index i). To annotate the actions that can happen in processes, we specify the conditions, action name, and the changes that the action introduces for the variables. For example, an annotation might be: //if "owner[i]" is "far", the action "towards.i" makes "owner[i]" become "near" (owner approaches the car). Note that, when processing conditions, if "complex_composite_conditions" exists as a key, its value alone forms the condition and should be directly described without mentioning "complex_composite_conditions". For other entries in conditions, the key and value together form the condition. Now please generate the NL annotations for each process in the json data, ensuring that the annotation for each action will span a new row. The json data is as follows:\n{info_action}"""
-        
-        data2_interaction = get_LLM_answers(prompt2, parsed_action_data, 'skip')
-        if data2_interaction and 'answerGPT' in data2_interaction:
-            data2_content = data2_interaction['answerGPT']
-        else:
-            print("Error: Failed to get NL for actions or answerGPT missing.")
-    except json.JSONDecodeError:
-        print("Error: Could not decode JSON from action_answer_str for NL generation.")
-    except Exception as e:
-        print(f"Error in generating NL for actions: {str(e)}")
+            print("Error: Could not decode JSON from action_answer_str for NL generation.")
+        except Exception as e:
+            print(f"Error in generating NL for actions: {str(e)}")
 
     # Part 3: NL for Assertions
     data3_content = _process_assertions_for_nl_helper(structured_data, assertions_list)
@@ -424,7 +540,7 @@ def gen_nl_instructions(structured_data, const_answer_str, action_answer_str, as
     # Save parts
     nl_parts_path = './history/nl-instruction-part.json'
     try:
-        with open(nl_parts_path, 'r') as f:
+        with open(nl_parts_path, 'r', encoding='utf-8') as f:
             existing_parts_data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         existing_parts_data = []
@@ -437,7 +553,7 @@ def gen_nl_instructions(structured_data, const_answer_str, action_answer_str, as
         "data3": data3_content
     }
     existing_parts_data.append(new_part_entry)
-    with open(nl_parts_path, 'w') as f:
+    with open(nl_parts_path, 'w', encoding='utf-8') as f:
         json.dump(existing_parts_data, f, indent=2)
     
     print("Assertion Annotations: ", data3_content)
@@ -445,7 +561,7 @@ def gen_nl_instructions(structured_data, const_answer_str, action_answer_str, as
     # Save full prompt
     nl_claude_path = './history/nl-instruction-claude.json'
     try:
-        with open(nl_claude_path, 'r') as f:
+        with open(nl_claude_path, 'r', encoding='utf-8') as f:
             existing_claude_data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         existing_claude_data = []
@@ -455,7 +571,7 @@ def gen_nl_instructions(structured_data, const_answer_str, action_answer_str, as
         "fullText": full_prompt
     }
     existing_claude_data.append(new_claude_entry)
-    with open(nl_claude_path, 'w') as f:
+    with open(nl_claude_path, 'w', encoding='utf-8') as f:
         json.dump(existing_claude_data, f, indent=2)
 
     end_time = time.perf_counter()
@@ -467,7 +583,7 @@ def gen_nl_instructions(structured_data, const_answer_str, action_answer_str, as
 
 def _get_most_relevant_rag_example_basic(instruction, rag_database_path='./database-rag-claude.json'):
     try:
-        with open(rag_database_path, 'r') as f:
+        with open(rag_database_path, 'r', encoding='utf-8') as f:
             database = json.load(f)
         
         if not instruction:
@@ -496,10 +612,10 @@ def _get_most_relevant_rag_example_basic(instruction, rag_database_path='./datab
         return {"nl": "", "code": ""}
 
 def _get_claude_code_completion(prompt_text, history_file_path):
-    """Code generation using DeepSeek-V4-Flash"""
+    """Code generation using DeepSeek-V4-pro"""
     try:
         response = client_code.chat.completions.create(
-            model="deepseek-v4-flash",
+            model="deepseek-v4-pro",
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt_text}]
         )
@@ -516,14 +632,14 @@ def _get_claude_code_completion(prompt_text, history_file_path):
         }
 
         try:
-            with open(history_file_path, 'r') as f:
+            with open(history_file_path, 'r', encoding='utf-8') as f:
                 history_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             history_data = []
         
         history_data.append(interaction)
 
-        with open(history_file_path, 'w') as f:
+        with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_data, f, indent=4)
         
         return answer
@@ -533,12 +649,14 @@ def _get_claude_code_completion(prompt_text, history_file_path):
 
 def gen_code(structured_data, full_nl_prompt):
     model_name = structured_data.get('modelName', 'unknown_model')
+    target_module = _get_target_module(structured_data)
+    resources = _get_module_resources(target_module)
     print(f"Starting code generation for {model_name}...")
     start_time = time.perf_counter()
 
     # 1. RAG: Get most relevant example
     print("Retrieving RAG example...")
-    retrieved_example = _get_most_relevant_rag_example_basic(full_nl_prompt)
+    retrieved_example = _get_most_relevant_rag_example_basic(full_nl_prompt, resources['rag_path'])
     retrieved_nl = retrieved_example['nl']
     retrieved_code = retrieved_example['code']
     # print(f"RAG NL: {retrieved_nl[:100]}...\nRAG Code: {retrieved_code[:100]}...")
@@ -546,27 +664,39 @@ def gen_code(structured_data, full_nl_prompt):
     # 2. Read Syntax Data
     syntax_general_info = ""
     syntax_pitfalls_rules = ""
+    syntax_reference = ""
+    _operator_keys = ['wait', 'timeout', 'deadline', 'within', 'interrupt', 'ifb', 'urgent', 'assertions']
     try:
-        with open('./syntax-dataset.json', 'r') as f:
+        with open(resources['syntax_path'], 'r', encoding='utf-8') as f:
             syntax_data = json.load(f)
-        syntax_general_info = syntax_data.get("general_info", "")
-        syntax_pitfalls_rules = syntax_data.get("pitfalls_rules", "")
-        # print("Syntax data loaded.")
+        if resources['syntax_section']:
+            section = syntax_data.get(resources['syntax_section'], {})
+            syntax_general_info = section.get("general_info", "")
+            syntax_pitfalls_rules = section.get("pitfalls_rules", "")
+        else:
+            syntax_general_info = syntax_data.get("general_info", "")
+            syntax_pitfalls_rules = syntax_data.get("pitfalls_rules", "")
+            # Collect all operator reference cards
+            _ref_parts = [syntax_general_info]
+            for k in _operator_keys:
+                if k in syntax_data:
+                    _ref_parts.append(f"{k}: {syntax_data[k]}")
+            syntax_reference = "\n".join(_ref_parts)
     except FileNotFoundError:
         print("Error: syntax-dataset.json not found.")
     except json.JSONDecodeError:
         print("Error: Could not decode syntax-dataset.json.")
 
+    # Use full reference if available, otherwise fallback
+    _syntax_section = syntax_reference if syntax_reference else (syntax_general_info + "\n" + syntax_pitfalls_rules)
+
     # 3. Generate System Description for the prompt
-    # Using the existing helper, it also includes interaction mode which might be fine for context
     system_description_for_prompt = _generate_descriptions_for_actions_helper(structured_data)
-    # print(f"System description for prompt: {system_description_for_prompt[:200]}...")
 
     # 4. Construct Final Prompt for Claude
-    # Based on codegen.html prompt structure
     final_code_gen_prompt = f"""You are an expert in PAT (Process Analysis Toolkit), and you already possess a strong understanding of PAT concepts as outlined in the documentation. As a reminder, here are a few key guidelines:
 --- Quick Reference ---
-General Information: {syntax_general_info}
+{_syntax_section}
 
 Pitfalls and Syntax Guidelines: {syntax_pitfalls_rules}
 
@@ -614,6 +744,7 @@ def _split_code_and_assertions(code):
             r'^(?!\s*//)\s*'        # ── must be at line start, not // comment
             r'#define[^\n]*\n'      # ── a real #define line
         r')*'                     # repeat zero or more times
+        r'\s*'                    # ── skip blank lines between defines and asserts
         r'^(?!\s*//)\s*'          # ── now for the #assert line…
         r'#assert[^\n]*;?'        # ── a real #assert
         )
@@ -667,17 +798,18 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
     print(f"Starting code verification...")
     start_time = time.perf_counter()
     model_name = structured_data.get('modelName', 'unknown_model')
-    
+    target_module = _get_target_module(structured_data)
+    file_ext = _get_module_file_extension(target_module)
+
     # Setup directories
     root_path = "c:/Users/njr/Desktop/PAT-Agent-master"
     pat_exe_path = "C:/Program Files/Process Analysis Toolkit/Process Analysis Toolkit 3.5.1/PAT3.Console.exe"
+    gen_root = os.environ.get("PAT_OUTPUT_DIR", f"{root_path}/Automated_Pipelines/Full_Pipeline/generated_code")
     
     if is_refine:
-        # If we're refining, create a specific subdirectory for this round
-        folder_path = f"{root_path}/Automated_Pipelines/Full_Pipeline/generated_code/{model_name}/refine_round_{refine_round}"
+        folder_path = f"{gen_root}/{model_name}/refine_round_{refine_round}"
     else:
-        # Initial verification uses the main model directory
-        folder_path = f"{root_path}/Automated_Pipelines/Full_Pipeline/generated_code/{model_name}"
+        folder_path = f"{gen_root}/{model_name}"
     
     # Create the directory if it doesn't exist
     if not os.path.exists(folder_path):
@@ -707,7 +839,7 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
     
     # Save each code block and verify it
     for i, block in enumerate(code_blocks):
-        input_file = f"{folder_path}/{i}.csp"
+        input_file = f"{folder_path}/{i}.{file_ext}"
         output_file = f"{folder_path}/pat_output_{i}.txt"
         
         # Save the code block to file
@@ -721,10 +853,11 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
         
         # Choose the appropriate command based on the assertion type
         pat_exe = pat_exe_path
+        engine_flag = f"-{target_module}"
         if ('reaches' in block) or ('deadlockfree' in block):
-            command = [pat_exe, "-csp", "-engine", "1", input_file, output_file]
+            command = [pat_exe, engine_flag, "-engine", "1", input_file, output_file]
         else:
-            command = [pat_exe, "-csp", input_file, output_file]
+            command = [pat_exe, engine_flag, input_file, output_file]
         
         # Run the PAT verification
         try:
@@ -733,6 +866,7 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
                 output = f.read()
             if output == "":
                 any_empty = True
+                pat_result = "PAT produced empty output - likely syntax error"
                 print(f"Warning: Empty output for assertion {i} - potential syntax error")
             
             # Extract verification result
@@ -745,9 +879,20 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
             if start_idx != -1 and end_idx != -1:
                 pat_result = output[start_idx + len(start_marker):end_idx].strip()
             else:
-                # No proper verification result found
+                # No proper verification result found - capture raw PAT error
                 any_empty = True
-                pat_result = "Verification result not found - potential syntax error"
+                raw_output = output.strip()
+                if "Parsing Error" in raw_output:
+                    for line in raw_output.splitlines():
+                        if "Parsing Error" in line or "Error" in line:
+                            pat_result = line.strip()
+                            break
+                    else:
+                        pat_result = raw_output[:500]
+                elif raw_output:
+                    pat_result = raw_output[:500]
+                else:
+                    pat_result = "Verification result not found - potential syntax error"
             
             # Extract the assertion line from the code block
             assertion_line = ""
@@ -817,7 +962,8 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
                 'assertion': result['assertion'],
                 'trace': trace,
                 'current_result': result['actualResult'],
-                'desired_result': expected_outcome
+                'desired_result': expected_outcome,
+                'pat_error': result.get('patResult', '')
             })
     
     # Save mismatch traces if any
@@ -836,7 +982,7 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
             print(f"Error saving mismatch traces: {e}")
     else:
         # If no mismatches, save verified code
-        verified_code_path = f"{folder_path}/verifiedCode.csp"
+        verified_code_path = f"{folder_path}/verifiedCode.{file_ext}"
         try:
             with open(verified_code_path, 'w', encoding='utf-8') as f:
                 f.write(code_to_verify)
@@ -871,7 +1017,7 @@ def verify_code(structured_data, code_to_verify, is_refine=False, refine_round=0
     print(f"Code verification completed in {run_time:.2f} seconds. Has mismatches: {has_mismatch}, Has empty results: {any_empty}")
     return verification_results, has_mismatch, any_empty
 
-def _process_mismatch_traces(mismatches):
+def _process_mismatch_traces_csp(mismatches):
     """
     Process mismatch traces to generate feedback for Claude to use in refinement.
     """
@@ -920,7 +1066,167 @@ def _process_mismatch_traces(mismatches):
     
     return "\n".join(processed_messages)
 
-def gen_refine(structured_data, current_code, mismatches, refine_round):
+
+def _process_mismatch_traces_rts(mismatches):
+    """
+    RTS-aware version: process mismatch traces into feedback for the LLM.
+    Handles parsing errors, timing-specific failures, and assertion violations.
+    """
+    processed_messages = []
+
+    for refinement_point in mismatches:
+        if processed_messages:
+            processed_messages.append("---")
+
+        assertion = refinement_point.get('assertion', '')
+        trace = refinement_point.get('trace', '')
+        current_result = refinement_point.get('current_result', '')
+        desired_result = refinement_point.get('desired_result', '')
+        pat_error = refinement_point.get('pat_error', '')
+
+        # === CASE 0: PARSING / SYNTAX ERROR ===
+        is_parse_error = (
+            current_result == '' or
+            'Parsing Error' in pat_error or
+            'syntax error' in pat_error.lower() or
+            'EMPTY_OUTPUT' in pat_error or
+            'potential syntax error' in pat_error.lower()
+        )
+
+        if is_parse_error:
+            err_text = pat_error if pat_error else 'unknown syntax error'
+            message = (
+                f"The generated code has a SYNTAX/PARSING ERROR and cannot be verified.\n"
+                f"PAT error message: {err_text}\n"
+                f"Common RTS syntax pitfalls to check:\n"
+                f"  - Wait[n] MUST use ';' (semicolon), NOT '->' for sequential composition.\n"
+                f"    Correct: Wait[5]; next -> Stop\n"
+                f"    Wrong:   Wait[5] -> next -> Stop\n"
+                f"  - Timed processes (Wait/deadline/timeout/within/interrupt) CANNOT appear inside [guard]P or ifa{{}}. Use ifb(guard){{P}} instead.\n"
+                f"  - Data operations {{...}} followed by timing operators need an event between them.\n"
+                f"    Correct: set{{x=1;}} -> tick -> Wait[3];\n"
+                f"  - Event names MUST NOT contain curly braces {{}}.\n"
+                f"  - PAT does NOT support C-style ternary (? :) — use if/else process branching.\n"
+                f"Please fix the syntax error and regenerate the code."
+            )
+            processed_messages.append(message)
+            continue
+
+        # === CASE 1: DEADLOCK ===
+        if "deadlockfree" in assertion:
+            if trace and trace != "<init>":
+                message = (
+                    f"The generated code violates: {assertion}\n"
+                    f"The system is prone to DEADLOCK. The deadlock can be triggered by this trace:\n"
+                    f"  {trace}\n"
+                    f"Please analyze:\n"
+                    f"  1. Whether any process state lacks an outgoing transition (no enabled event or guard).\n"
+                    f"  2. Whether all branches of if/ifb/ifa have a continuation path.\n"
+                    f"  3. In RTS: whether Wait[n] or deadline[t] processes have a valid next step (Wait[n]; next -> ...).\n"
+                    f"  4. Whether parallel composition (||) requires all processes to synchronize on shared events — if one process has no matching event, deadlock occurs."
+                )
+            else:
+                message = (
+                    f"The generated code violates: {assertion}\n"
+                    f"The system deadlocks immediately after initialization.\n"
+                    f"Check that every process has at least one enabled initial transition."
+                )
+            processed_messages.append(message)
+
+        # === CASE 2: REACHABILITY ===
+        elif "reaches" in assertion:
+            if trace == "<init>":
+                message = (
+                    f"The generated code violates: {assertion}\n"
+                    f"The target state is UNREACHABLE from the initial state.\n"
+                    f"Please check:\n"
+                    f"  1. Are the variable assignments and guards along the path to the target logically consistent?\n"
+                    f"  2. Does any guard condition permanently block the path to the target?\n"
+                    f"  3. In RTS: does a deadline[t] or timeout[t] expire before the target can be reached?"
+                )
+            else:
+                message = (
+                    f"The generated code violates: {assertion}\n"
+                    f"The target state is UNREACHABLE.\n"
+                    f"Trace leading to violation: {trace}\n"
+                    f"Analyze why the target cannot be reached from the current execution path."
+                )
+            processed_messages.append(message)
+
+        # === CASE 3: LTL (|= []... or |= []<>...) ===
+        elif "|=" in assertion:
+            if trace == "<init>":
+                message = (
+                    f"The generated code violates the LTL property: {assertion}\n"
+                    f"The property fails from the initial state.\n"
+                    f"Check initial variable values — they may already violate the invariant.\n"
+                    f"Verify that #define propositions used in LTL are correctly defined (no quotes, no spaces in names)."
+                )
+            else:
+                actions = [a.strip() for a in trace.strip("<>").split("->")]
+                last_action = actions[-1] if actions else "unknown"
+                other_actions = ", ".join(actions[:-1]) if len(actions) > 1 else "none"
+                message = (
+                    f"The generated code violates the LTL property: {assertion}\n"
+                    f"Current result: {current_result}, expected: {desired_result}\n"
+                    f"The violation occurs after action: {last_action}\n"
+                    f"Trace: {trace}\n"
+                    f"Please analyze:\n"
+                    f"  1. Is the guard condition for '{last_action}' too weak (allowing the action when it should be blocked)?\n"
+                    f"  2. In RTS: are timing constraints (deadline/within/timeout) correctly placed to prevent premature actions?\n"
+                    f"  3. If this is a mutual exclusion violation, check interleaving (|||) ordering — consider using || with synchronized events."
+                )
+            processed_messages.append(message)
+
+        # === CASE 4: DEFAULT (other assertion types) ===
+        else:
+            if trace == "<init>":
+                message = (
+                    f"The generated code violates: {assertion}\n"
+                    f"Current result: {current_result}, expected: {desired_result}\n"
+                    f"The assertion fails after initialization. Check initial variable values and constant definitions."
+                )
+            else:
+                actions = [a.strip() for a in trace.strip("<>").split("->")]
+                last_action = actions[-1] if actions else "unknown"
+                other_actions = ", ".join(actions[:-1]) if len(actions) > 1 else "none"
+                message = (
+                    f"The generated code violates: {assertion}\n"
+                    f"Current result: {current_result}, expected: {desired_result}\n"
+                    f"The assertion fails after action: {last_action}\n"
+                    f"Trace: {trace}\n"
+                    f"Check if the guard/condition for '{last_action}' is correct, and also review: {other_actions}."
+                )
+            processed_messages.append(message)
+
+    return "\n".join(processed_messages)
+
+
+def _process_mismatch_traces(mismatches, target_module='csp'):
+    """
+    Dispatcher: routes to CSP or RTS version of mismatch trace processing.
+    """
+    if target_module == 'rts':
+        return _process_mismatch_traces_rts(mismatches)
+    return _process_mismatch_traces_csp(mismatches)
+
+
+def _explain_timed_counterexample(structured_data, mismatches):
+    model_desc = structured_data.get('modelDesc', '')
+    constraints = structured_data.get('timeConstraints', [])
+    prompt = f"""You are an expert in real-time systems analysis.
+System description: {model_desc}
+Timing constraints: {json.dumps(constraints, ensure_ascii=False)}
+Mismatches: {json.dumps(mismatches, ensure_ascii=False)}
+
+Explain in concise natural language:
+1) What event sequence likely caused the violation.
+2) Which timing expectation is violated.
+3) What should be changed in model guards/invariants/resets.
+"""
+    return get_LLM_answers(prompt, structured_data, 'skip')
+
+def gen_refine(structured_data, current_code, mismatches, refine_round, pat_error=""):
     """
     Generate refined code based on verification mismatches.
     Returns the refined code.
@@ -928,12 +1234,31 @@ def gen_refine(structured_data, current_code, mismatches, refine_round):
     print(f"Starting code refinement round {refine_round}...")
     start_time = time.perf_counter()
     model_name = structured_data.get('modelName', 'unknown_model')
+    file_ext = _get_module_file_extension(_get_target_module(structured_data))
+    
+    # Determine target module for mismatch processing
+    target_module = _get_target_module(structured_data)
     
     # Process mismatch traces into feedback for Claude
-    processed_traces = _process_mismatch_traces(mismatches)
+    processed_traces = _process_mismatch_traces(mismatches, target_module)
+    
+    # Load syntax rules for RTS refinement
+    syntax_reminder = ""
+    if target_module == 'rts':
+        try:
+            with open('./syntax-dataset-rt.json', 'r', encoding='utf-8') as f:
+                syntax_data = json.load(f)
+            syntax_reminder = f"""\n\n=== CRITICAL RTS SYNTAX RULES (review before regenerating) ===\n{syntax_data.get('pitfalls_rules', '')}\n=== END RULES ===\n"""
+        except Exception:
+            pass
+    
+    # Include PAT error if available (parsing error feedback)
+    pat_error_section = ""
+    if pat_error:
+        pat_error_section = f"\n\nThe previous refinement produced code with the following PAT PARSING ERROR:\n{pat_error}\nPlease fix this syntax error before addressing other issues.\n"
     
     # Construct refinement prompt
-    refinement_prompt = f'''You are an expert in PAT (Process Analysis Toolkit). Your task now is to refine your previously generated PAT code according to some suggestions.\n\nYour previously generated PAT code is as follows:\n{current_code}\n\nThe logic that we can follow to refine our code to satisfy user requirements is:\n{processed_traces}\n\nPlease refine and fix the PAT code so that it avoids the problems we mentioned, and only through modifying code relevant to our suggestions. **The other parts of code should not be changed to avoid syntax error, especially, NEVER remove semicolons.** Please provide the revised PAT code.'''
+    refinement_prompt = f'''You are an expert in PAT (Process Analysis Toolkit). Your task now is to refine your previously generated PAT code according to some suggestions.\n\nYour previously generated PAT code is as follows:\n{current_code}\n\nThe logic that we can follow to refine our code to satisfy user requirements is:\n{processed_traces}\n{syntax_reminder}\n{pat_error_section}\nPlease refine and fix the PAT code so that it avoids the problems we mentioned, and only through modifying code relevant to our suggestions. **The other parts of code should not be changed to avoid syntax error, especially, NEVER remove semicolons.** Please provide the revised PAT code.'''
 
     # Call Claude for refinement
     print("Calling Claude for code refinement...")
@@ -948,7 +1273,7 @@ def gen_refine(structured_data, current_code, mismatches, refine_round):
     model_name = structured_data.get('modelName', 'unknown_model')
     root_path = "c:/Users/njr/Desktop/PAT-Agent-master"
     folder_path = f"{root_path}/Automated_Pipelines/Full_Pipeline/generated_code/{model_name}"
-    refined_code_path = f"{folder_path}/refined_code_{refine_round}.csp"
+    refined_code_path = f"{folder_path}/refined_code_{refine_round}.{file_ext}"
     
     try:
         with open(refined_code_path, 'w', encoding='utf-8') as f:
@@ -994,8 +1319,9 @@ def _extract_longest_code_block(text):
     return longest_block.strip()
 
 if __name__ == '__main__':
-    # read ./test-automated-pipeline.json
-    with open('./PAT.json', 'r') as file:
+    dataset_path = os.environ.get('PAT_DATASET_PATH', './PAT.json')
+    print(f"Using dataset: {dataset_path}")
+    with open(dataset_path, 'r', encoding='utf-8') as file:
         structured_data_list = json.load(file)
         # assert len(structured_data_list) == 6, "The number of entries in the JSON file should be 6."
         for i in range(len(structured_data_list)): # Run all entries
@@ -1006,12 +1332,19 @@ if __name__ == '__main__':
             # Stage 1: Generate Constants and Variables
             print(f"getting const and vars for entry {i}")
             gen_const_and_vars(current_structured_data)
+
+            # Stage 1.5: Generate time constraints for timed models
+            target_module = _get_target_module(current_structured_data)
+            time_constraints_text = ""
+            if target_module == 'rts' or (current_structured_data.get('modelType', '').strip().lower() == 'timed'):
+                gen_time_constraints(current_structured_data)
+                time_constraints_text = _load_time_constraints_from_history()
             
             # Retrieve the result of gen_const_and_vars to pass to gen_actions
             processed_tables_for_actions = None
             const_history_path = './history/const-history.json'
             try:
-                with open(const_history_path, 'r') as hist_file:
+                with open(const_history_path, 'r', encoding='utf-8') as hist_file:
                     const_history = json.load(hist_file)
                 if const_history:
                     # Assuming the last entry corresponds to the gen_const_and_vars call just made
@@ -1044,7 +1377,7 @@ if __name__ == '__main__':
             latest_action_answer_str = None
             action_history_path = './history/action-history.json'
             try:
-                with open(action_history_path, 'r') as hist_file:
+                with open(action_history_path, 'r', encoding='utf-8') as hist_file:
                     action_history = json.load(hist_file)
                 if action_history:
                     latest_action_answer_str = action_history[-1]['answerGPT']
@@ -1069,13 +1402,19 @@ if __name__ == '__main__':
             
             # Stage 4: Generate NL Instructions
             print(f"generating NL instructions for entry {i}")
-            gen_nl_instructions(current_structured_data, latest_const_answer_str, latest_action_answer_str, assertions_list)
+            gen_nl_instructions(
+                current_structured_data,
+                latest_const_answer_str,
+                latest_action_answer_str,
+                assertions_list,
+                time_constraints_text=time_constraints_text
+            )
 
             # Retrieve the full_nl_prompt from the file saved by gen_nl_instructions
             retrieved_full_nl_prompt = None
             nl_claude_history_path = './history/nl-instruction-claude.json'
             try:
-                with open(nl_claude_history_path, 'r') as hist_file:
+                with open(nl_claude_history_path, 'r', encoding='utf-8') as hist_file:
                     nl_claude_history = json.load(hist_file)
                 if nl_claude_history:
                     retrieved_full_nl_prompt = nl_claude_history[-1].get('fullText')
@@ -1114,26 +1453,26 @@ if __name__ == '__main__':
                 retrieved_generated_code = None
                 claude_code_history_path = './history/claude-code.json'
                 try:
-                    with open(claude_code_history_path, 'r') as hist_file:
+                    with open(claude_code_history_path, 'r', encoding='utf-8') as hist_file:
                         claude_code_history = json.load(hist_file)
                     if claude_code_history:
                         retrieved_generated_code = claude_code_history[-1].get('answerClaude')
                     else:
                         print(f"Error: Claude code history is empty for entry {i}.")
-                        break
+                        continue
                     if not retrieved_generated_code:
                         print(f"Error: 'answerClaude' not found in the last Claude code history entry for entry {i}.")
-                        break
+                        continue
                 except FileNotFoundError:
                     print(f"Error: Claude code history file not found at {claude_code_history_path} for entry {i}")
-                    break
+                    continue
                 except json.JSONDecodeError:
                     print(f"Error: Could not decode JSON from Claude code history for entry {i}")
-                    break
+                    continue
 
                 if not retrieved_generated_code:
                     print(f"Could not retrieve generated code for entry {i}. Skipping verification stage.")
-                    break
+                    continue
                 
                 # Extract the longest code block from the LLM response
                 longest_code_block = _extract_longest_code_block(retrieved_generated_code)
@@ -1142,6 +1481,7 @@ if __name__ == '__main__':
                 
                 # Save both the original response and the extracted code for reference
                 model_name = current_structured_data.get('modelName', 'unknown_model')
+                file_ext = _get_module_file_extension(_get_target_module(current_structured_data))
                 root_path = "c:/Users/njr/Desktop/PAT-Agent-master"
                 folder_path = f"{root_path}/Automated_Pipelines/Full_Pipeline/generated_code/{model_name}"
                 os.makedirs(folder_path, exist_ok=True)
@@ -1149,7 +1489,7 @@ if __name__ == '__main__':
                 try:
                     with open(f"{folder_path}/original_llm_response.txt", 'w', encoding='utf-8') as f:
                         f.write(retrieved_generated_code)
-                    with open(f"{folder_path}/extracted_code.csp", 'w', encoding='utf-8') as f:
+                    with open(f"{folder_path}/extracted_code.{file_ext}", 'w', encoding='utf-8') as f:
                         f.write(longest_code_block)
                     print("Saved original LLM response and extracted code block for reference")
                 except Exception as e:
@@ -1164,8 +1504,32 @@ if __name__ == '__main__':
                 if not any_empty:
                     verified_successfully = True
                     print(f"Code verified without syntax errors on attempt {gen_count}")
+                    if has_mismatch and _get_target_module(current_structured_data) == 'rts':
+                        explanation = _explain_timed_counterexample(current_structured_data, verification_results)
+                        try:
+                            with open('./history/counterexample_explanations.json', 'r', encoding='utf-8') as f:
+                                explain_history = json.load(f)
+                        except (FileNotFoundError, json.JSONDecodeError):
+                            explain_history = []
+                        if explanation:
+                            explain_history.append(explanation)
+                            with open('./history/counterexample_explanations.json', 'w', encoding='utf-8') as f:
+                                json.dump(explain_history, f, indent=2, ensure_ascii=False)
                     break
                 else:
+                    # Collect PAT errors to feed back to LLM on next regeneration
+                    _pat_errors = []
+                    for _r in verification_results:
+                        _pe = _r.get('patResult', '')
+                        if _pe and ('Parsing Error' in _pe or 'syntax error' in _pe.lower() or 'EMPTY' in _pe or 'Error' in _pe):
+                            _pat_errors.append(f"// PAT Error: {_pe}")
+                        elif not _pe:
+                            _pat_errors.append("// PAT Error: code produced empty PAT output")
+                    if _pat_errors:
+                        _prev_code_section = f"=== PREVIOUS CODE (the PAT code that caused the parsing error) ===\n{longest_code_block}\n=== END OF PREVIOUS CODE ===\n\n"
+                        _error_block = _prev_code_section + "=== PREVIOUS PAT PARSING ERROR (fix these before regenerating) ===\n" + "\n".join(_pat_errors) + "\n=== END OF PAT ERRORS ===\n\n"
+                        retrieved_full_nl_prompt = _error_block + retrieved_full_nl_prompt
+                    
                     # If this was the last attempt, save error information
                     if gen_count >= max_gen_attempts:
                         print(f"Maximum regeneration attempts ({max_gen_attempts}) reached. Could not produce error-free code.")
@@ -1189,10 +1553,11 @@ if __name__ == '__main__':
                 
                 # Prepare for refinement
                 current_code = longest_code_block  # Use the extracted code block
-                max_refine_attempts = 5
+                max_refine_attempts = 0 if os.environ.get('PAT_NO_REPAIR') else 5
                 refine_count = 0
                 all_mismatches_fixed = False
                 model_name = current_structured_data.get('modelName', 'unknown_model')
+                file_ext = _get_module_file_extension(_get_target_module(current_structured_data))
                 
                 # Main directory for the model
                 root_path = "c:/Users/njr/Desktop/PAT-Agent-master"
@@ -1233,10 +1598,11 @@ if __name__ == '__main__':
                     print(f"\n=== Starting refinement round {refine_count}/{max_refine_attempts} ===\n")
                     
                     # Generate refined code
+                    _current_pat_error = ""  # Collect PAT parsing errors for retry feedback
                     for i in range(3): # possible to give 3 chances if the generated code contains any syntax error.
                         if i > 0:
                             print(f"Syntax error in refined code, regenerating... (Regeneration attempt: {i})")
-                        refined_code = gen_refine(current_structured_data, current_code, mismatches, refine_count)
+                        refined_code = gen_refine(current_structured_data, current_code, mismatches, refine_count, pat_error=_current_pat_error)
                         
                         # Extract the longest code block from the refined response
                         longest_refined_block = _extract_longest_code_block(refined_code)
@@ -1247,7 +1613,7 @@ if __name__ == '__main__':
                         try:
                             with open(f"{model_dir}/original_refined_{refine_count}.txt", 'w', encoding='utf-8') as f:
                                 f.write(refined_code)
-                            with open(f"{model_dir}/extracted_refined_{refine_count}.csp", 'w', encoding='utf-8') as f:
+                            with open(f"{model_dir}/extracted_refined_{refine_count}.{file_ext}", 'w', encoding='utf-8') as f:
                                 f.write(longest_refined_block)
                         except Exception as e:
                             print(f"Error saving original/extracted refined code: {e}")
@@ -1266,9 +1632,18 @@ if __name__ == '__main__':
                         except Exception as e:
                             print(f"Error saving verification results for round {refine_count}: {e}")
                         
-                        # Check for syntax errors (shouldn't happen but just in case)
+                        # Check for syntax errors — feed back to LLM on retry
                         if refine_any_empty:
-                            continue
+                            # Collect PAT error to feed back on next retry
+                            _ref_errs = []
+                            for _rr in refine_verification_results:
+                                _pe2 = _rr.get('patResult', '')
+                                if _pe2 and ('Parsing Error' in _pe2 or 'syntax error' in _pe2.lower() or 'EMPTY' in _pe2 or 'Error' in _pe2):
+                                    _ref_errs.append(f"PAT Error: {_pe2}")
+                                elif not _pe2:
+                                    _ref_errs.append("PAT Error: code produced empty PAT output")
+                            _current_pat_error = " | ".join(_ref_errs) if _ref_errs else "unknown syntax error"
+                            continue  # Retry with pat_error captured for next gen_refine call
                         else:
                             # Update current code to refined code
                             current_code = longest_refined_block
@@ -1280,7 +1655,7 @@ if __name__ == '__main__':
                         print(f"All mismatches fixed in refinement round {refine_count}!")
                         
                         # Save the successful code as verifiedCode.csp in the main model directory
-                        verified_code_path = f"{model_dir}/verifiedCode.csp"
+                        verified_code_path = f"{model_dir}/verifiedCode.{file_ext}"
                         try:
                             with open(verified_code_path, 'w', encoding='utf-8') as f:
                                 f.write(current_code)
@@ -1333,7 +1708,7 @@ if __name__ == '__main__':
                     print(f"Reached maximum refinement attempts ({max_refine_attempts}) without fixing all issues.")
                     
                     # Save the final refined code anyway
-                    final_code_path = f"{model_dir}/final_refined_code.csp"
+                    final_code_path = f"{model_dir}/final_refined_code.{file_ext}"
                     try:
                         with open(final_code_path, 'w', encoding='utf-8') as f:
                             f.write(current_code)

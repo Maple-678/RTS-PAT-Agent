@@ -1,0 +1,19 @@
+enum {REACTOR_NORMAL, REACTOR_OVERHEATED, MONITORING, COOLING_ATTEMPTED, EMERGENCY_SHUTDOWN};
+var reactorState = REACTOR_NORMAL;
+var safetyState = MONITORING;
+Reactor() = 
+  [reactorState == REACTOR_NORMAL] overheat -> {reactorState = REACTOR_OVERHEATED;} -> Reactor()
+  []
+  [reactorState == REACTOR_OVERHEATED] cooling -> {reactorState = REACTOR_NORMAL;} -> Reactor()
+  []
+  [reactorState == REACTOR_OVERHEATED] emergency_shutdown -> Stop;
+SafetyMonitor() = 
+  overheat -> {safetyState = COOLING_ATTEMPTED;} ->
+  ( (cooling -> {safetyState = MONITORING;} -> SafetyMonitor())
+    timeout[3] 
+    (emergency_shutdown -> {safetyState = EMERGENCY_SHUTDOWN;} -> Stop)
+  );
+reactor_shutdown() = Reactor() || SafetyMonitor();
+
+#define shutdown_done (safetyState == EMERGENCY_SHUTDOWN);
+#assert reactor_shutdown() deadlockfree;

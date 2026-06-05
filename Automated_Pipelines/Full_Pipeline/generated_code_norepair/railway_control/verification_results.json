@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() |= [] safe;",
+    "patResult": "The Assertion (System() |= [] safe) is NOT valid.\nA counterexample is presented as follows.\n<init -> elapse -> tock -> [Wait[0]] -> approach -> lower -> [ifb((gate == GATE_DOWN))] -> tock -> [Wait[0]] -> tock -> [Wait[0]] -> raise -> lower -> tock -> cross -> [Wait[0]] -> tock -> [Wait[0]] -> raise>",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Valid"
+  }
+]

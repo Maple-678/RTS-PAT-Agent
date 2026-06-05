@@ -1,0 +1,8 @@
+[
+  {
+    "assertion": "#assert System deadlockfree;",
+    "trace": "<init -> set_i -> set_i -> set_i -> set_i -> tick -> tock -> tock -> tock -> [Wait[0]] -> [Wait[0]] -> [Wait[0]] -> [Wait[0]] -> enterCS_i -> exitCS_i -> set_i>",
+    "current_result": "Invalid",
+    "desired_result": "Valid"
+  }
+]

@@ -1,0 +1,9 @@
+#define T 10;
+var alertFlag = 0;
+
+RobotArm() = start_weld -> ( (weld_done -> Skip) [] (alert{alertFlag=1;} -> reset{alertFlag=0;} -> Skip) );
+Controller() = Skip;
+System() = RobotArm() ||| Controller();
+
+#define alert_raised (alertFlag == 1);
+#assert System() deadlockfree;

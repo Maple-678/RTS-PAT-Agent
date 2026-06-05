@@ -1,0 +1,16 @@
+enum {IDLE, BREWING, DISPENSED, CLEANING, CLEANED};
+var state = IDLE;
+
+CoffeeMaker() = start{state = BREWING} -> 
+   ( (wait_fast -> Wait[4]; dispense{state = DISPENSED} -> CoffeeMaker())
+     [] 
+     (wait_slow -> Wait[8]; Stop)
+   ) timeout[6] 
+   (cleanup{state = CLEANING} -> Wait[1]; cleaned{state = CLEANED} -> CoffeeMaker());
+
+Timer() = timer_tick -> Timer();
+
+System() = CoffeeMaker ||| Timer();
+
+#define cleanup_done (state == CLEANED);
+#assert System() deadlockfree;

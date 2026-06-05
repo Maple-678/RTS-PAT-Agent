@@ -1,0 +1,18 @@
+=======================================================
+Assertion: System() |= [] mutex
+********Verification Result********
+The Assertion (System() |= [] mutex) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using BFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:71
+Total Transitions:138
+Time Used:0.0388486s
+Estimated Memory Used:8921.256KB
+
+

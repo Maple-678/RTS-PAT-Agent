@@ -1,0 +1,18 @@
+=======================================================
+Assertion: parking_meter() deadlockfree
+********Verification Result********
+The Assertion (parking_meter() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:16
+Total Transitions:18
+Time Used:0.0227543s
+Estimated Memory Used:8610.008KB
+
+

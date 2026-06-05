@@ -1,0 +1,23 @@
+#define HEARTBEAT_INTERVAL 5;
+#define BEATING 1;
+#define STOPPED 0;
+#define PACEMAKER_DELAY 2;
+
+var heartState = BEATING;
+
+Heart() = ifb(heartState == BEATING) {
+            Wait[HEARTBEAT_INTERVAL];
+            ( beat{heartState=BEATING;} -> Heart()
+              [] stop{heartState=STOPPED;} -> Heart_Stopped() )
+          };
+Heart_Stopped() = ifb(heartState == BEATING) { Heart() };
+
+Pacemaker() = Wait[1]; Check();
+Check() = if (heartState == STOPPED) { Wait[PACEMAKER_DELAY]; pace{heartState=BEATING;} -> Pacemaker() }
+          else { Pacemaker() };
+
+System() = Heart() ||| Pacemaker();
+
+#define beating (heartState == BEATING);
+#assert System() deadlockfree;
+#assert System() |= []<> beating;

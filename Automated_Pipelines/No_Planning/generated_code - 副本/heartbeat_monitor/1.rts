@@ -1,0 +1,10 @@
+var alarm_triggered = false;
+
+Sender() = heartbeat -> Wait[2]; Sender();
+
+Monitor() = (heartbeat -> Monitor()) timeout[5] (alarm{alarm_triggered = true} -> Monitor());
+
+System() = Sender() || Monitor();
+
+#define alarm_state (alarm_triggered == true);
+#assert System() reaches alarm_state;

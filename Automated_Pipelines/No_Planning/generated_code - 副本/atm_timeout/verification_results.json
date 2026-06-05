@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is NOT valid.\nThe following trace leads to a deadlock situation.\n<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> tock -> [timeout[0]] -> card_ejected>",
+    "actualResult": "Invalid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() reaches card_ejected_state;",
+    "patResult": "The Assertion (System() reaches card_ejected_state) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> tock -> [timeout[0]] -> card_ejected>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

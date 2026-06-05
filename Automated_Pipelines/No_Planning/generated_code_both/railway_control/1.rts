@@ -1,0 +1,15 @@
+var gate = 0;
+var train_state = 0;
+var approach_flag = 0;
+#define UP 0;
+#define DOWN 1;
+#define safety (train_state == 2 => gate == DOWN);
+
+Train() = train_approach{train_state=1; approach_flag=1;} ->
+          ifb(gate == DOWN) { cross{train_state=2;} -> leave{train_state=3; approach_flag=0;} -> Train() };
+
+Controller() = ifb(approach_flag == 1) { lower{gate=DOWN;} -> Wait[2]; raise{gate=UP;} -> Controller() };
+
+System() = Train() ||| Controller();
+
+#assert System |= []safety;

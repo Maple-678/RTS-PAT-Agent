@@ -1,0 +1,18 @@
+#define FLOOR1 0
+#define FLOOR2 1
+
+var lift_floor = FLOOR1;
+var button_pressed = 0;
+
+Door() = door_open -> Wait[3]; door_close -> Door();
+
+LiftCar() = ifb(button_pressed == 1)
+            { moving -> Wait[2]; arrived{lift_floor = (lift_floor == FLOOR1 ? FLOOR2 : FLOOR1); button_pressed = 0;} -> Skip }
+            ; LiftCar();
+
+Button() = press{button_pressed = 1} -> Button();
+
+System() = Door ||| LiftCar ||| Button;
+
+#define at_floor2 (lift_floor == FLOOR2)
+#assert System() reaches at_floor2;

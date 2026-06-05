@@ -1,0 +1,75 @@
+{
+    "codegen-time_2026-06-03-19-32-54": {
+        "runTime": 43.688220799999996
+    },
+    "verification-time_2026-06-03-19-32-55": {
+        "runTime": 1.3715563999999958,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round1_2026-06-03-19-34-01": {
+        "runTime": 66.0171536
+    },
+    "verification-time_2026-06-03-19-34-02": {
+        "runTime": 1.2425116999999943,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round2_2026-06-03-19-35-16": {
+        "runTime": 74.0146827
+    },
+    "refine-time_round3_2026-06-03-19-36-04": {
+        "runTime": 47.47071819999999
+    },
+    "verification-time_2026-06-03-19-36-04": {
+        "runTime": 0.41166979999999853,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-19-36-37": {
+        "runTime": 33.0361437
+    },
+    "verification-time_2026-06-03-19-36-39": {
+        "runTime": 1.227902399999948,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_round1_2026-06-03-19-37-54": {
+        "runTime": 75.0496718
+    },
+    "refine-time_round2_2026-06-03-19-39-09": {
+        "runTime": 75.12141779999996
+    },
+    "refine-time_round3_2026-06-03-19-39-44": {
+        "runTime": 35.106982200000004
+    },
+    "verification-time_2026-06-03-19-39-45": {
+        "runTime": 1.232653599999992,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-38-33": {
+        "runTime": 70.1710555
+    },
+    "verification-time_2026-06-03-21-38-34": {
+        "runTime": 1.0317688999999888,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-21-38-48": {
+        "runTime": 14.022485700000004
+    },
+    "verification-time_2026-06-03-21-38-49": {
+        "runTime": 1.3439221000000003,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-21-39-15": {
+        "runTime": 26.1680863
+    },
+    "verification-time_2026-06-03-21-39-17": {
+        "runTime": 1.0952812000000023,
+        "hasMismatch": true,
+        "codegenFailed": true
+    }
+}

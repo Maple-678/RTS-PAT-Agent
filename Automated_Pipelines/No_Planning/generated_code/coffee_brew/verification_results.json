@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "The Assertion (System() deadlockfree) is VALID.",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() reaches cleanup_done;",
+    "patResult": "The Assertion (System() reaches cleanup_done) is VALID.\nThe following trace leads to a state where the condition is satisfied.\n<init -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> cleanup -> tock -> [Wait[0]] -> cleaned>",
+    "actualResult": "Valid",
+    "desiredOutcome": "Valid"
+  }
+]

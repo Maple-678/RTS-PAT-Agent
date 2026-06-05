@@ -1,0 +1,14 @@
+[
+  {
+    "assertion": "#assert System() deadlockfree;",
+    "patResult": "Verification result not found - potential syntax error",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  },
+  {
+    "assertion": "#assert System() |= []safe;",
+    "patResult": "Verification result not found - potential syntax error",
+    "actualResult": "",
+    "desiredOutcome": "Valid"
+  }
+]

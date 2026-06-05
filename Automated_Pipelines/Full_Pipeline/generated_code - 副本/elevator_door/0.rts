@@ -1,0 +1,18 @@
+#define OPEN_DURATION 8;
+#define DOOR_OPEN 0;
+#define DOOR_CLOSED 1;
+#define DOOR_CLOSING 2;
+var doorState = DOOR_CLOSED;
+var openTimer = 0;
+
+Door() = open{doorState = DOOR_OPEN;} -> tick -> Wait[OPEN_DURATION];
+         closing{doorState = DOOR_CLOSING;} -> ClosingPhase();
+
+ClosingPhase() = (tick -> Wait[1]; close{doorState = DOOR_CLOSED;} -> Door()
+                  [] reopen -> open{doorState = DOOR_OPEN;} -> tick -> Wait[OPEN_DURATION]; closing{doorState = DOOR_CLOSING;} -> ClosingPhase());
+
+Button() = tick -> Button() [] reopen -> Button();
+
+elevator_door = Door() ||| Button();
+
+#assert elevator_door deadlockfree;

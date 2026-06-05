@@ -1,0 +1,9 @@
+#define TIME 10;
+var alerted = 0;
+#define alert_raised (alerted == 1);
+
+RobotArm() = start -> ( (weld -> done -> Stop) timeout[TIME] Controller() );
+Controller() = alert{alerted = 1;} -> reset -> Stop;
+System() = RobotArm();
+
+#assert System() reaches alert_raised;

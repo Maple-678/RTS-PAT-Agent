@@ -1,0 +1,17 @@
+=======================================================
+Assertion: System() |= []<> walk
+********Verification Result********
+The Assertion (System() |= []<> walk) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search with Zone Abstraction
+
+
+********Verification Statistics********
+Visited States:9
+Total Transitions:10
+Time Used:0.0270632s
+Estimated Memory Used:41247.344KB
+
+

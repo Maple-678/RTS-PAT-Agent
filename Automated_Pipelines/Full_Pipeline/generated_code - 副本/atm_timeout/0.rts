@@ -1,0 +1,20 @@
+#define TIMEOUT_DURATION 8;
+#define CARD_ABSENT 0;
+#define CARD_INSERTED 1;
+#define CARD_EJECTED 2;
+#define PIN_NOT_ENTERED 0;
+#define PIN_ENTERED 1;
+
+var cardState = CARD_ABSENT;
+var pinState = PIN_NOT_ENTERED;
+
+ATM() = card_insert{cardState = CARD_INSERTED; pinState = PIN_NOT_ENTERED;} -> 
+        ( pin_input{pinState = PIN_ENTERED;} -> process_transaction{cardState = CARD_ABSENT; pinState = PIN_NOT_ENTERED;} -> ATM()
+        ) timeout[TIMEOUT_DURATION] ( card_eject{cardState = CARD_EJECTED;} -> ATM() );
+
+User() = card_insert -> ( pin_input -> User() [] Wait[100]; User() );
+
+atm_timeout() = ATM() || User();
+
+#define card_ejected (cardState == CARD_EJECTED);
+#assert atm_timeout deadlockfree;

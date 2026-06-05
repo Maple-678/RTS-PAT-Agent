@@ -1,0 +1,20 @@
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is NOT valid.
+The following trace leads to a deadlock situation.
+<init -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> tock -> [timeout[0]] -> alert -> τ -> reset -> τ -> start -> weld -> τ -> done>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace with Digitization
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:12
+Total Transitions:23
+Time Used:0.0278304s
+Estimated Memory Used:8726.736KB
+
+

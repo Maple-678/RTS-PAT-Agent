@@ -1,0 +1,11 @@
+enum {WALK, DONT_WALK};
+var state = 0;
+
+#define walk (state == 0);
+#define dont_walk (state == 1);
+
+Crosswalk() = walk_on{state = 0;} -> Wait[4]; dont_walk_on{state = 1;} -> Wait[8]; Crosswalk();
+
+System() = Crosswalk();
+
+#assert System() |= []<>walk;

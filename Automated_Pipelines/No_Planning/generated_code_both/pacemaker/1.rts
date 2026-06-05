@@ -1,0 +1,10 @@
+#define BEAT_INTERVAL 5;
+#define TIMEOUT 2;
+
+Heart() = beat -> Wait[BEAT_INTERVAL]; Heart();
+
+Pacemaker() = (beat -> Pacemaker()) timeout[TIMEOUT] (pace_deliver -> Pacemaker());
+
+System() = Heart() || Pacemaker();
+
+#assert System |= []<>pace_deliver;

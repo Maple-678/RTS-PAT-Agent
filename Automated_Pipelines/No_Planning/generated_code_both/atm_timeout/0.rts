@@ -1,0 +1,9 @@
+var ejected = 0;
+#define TO 8;
+
+ATM = card_insert -> ((pin_enter -> done -> Stop) timeout[TO] (card_ejected{ejected = 1;} -> Stop));
+User = card_insert -> (pin_enter -> Stop [] Stop);
+System = ATM || User;
+
+#define card_ejected (ejected == 1);
+#assert System deadlockfree;

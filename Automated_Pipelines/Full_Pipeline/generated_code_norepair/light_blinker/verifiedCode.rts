@@ -1,0 +1,10 @@
+#define TOGGLE_INTERVAL 3;
+#define LIGHT_ON 1;
+#define LIGHT_OFF 0;
+var lightState = LIGHT_OFF;
+
+Light() = on{lightState = LIGHT_ON;} -> Wait[TOGGLE_INTERVAL]; off{lightState = LIGHT_OFF;} -> Wait[TOGGLE_INTERVAL]; Light();
+
+System() = Light();
+
+#assert System() deadlockfree;

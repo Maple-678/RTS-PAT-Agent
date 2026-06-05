@@ -1,0 +1,36 @@
+#define CARD_ABSENT 0;
+#define CARD_INSERTED 1;
+#define PIN_NOT_ENTERED 0;
+#define PIN_ENTERED 1;
+#define STATE_IDLE 0;
+#define STATE_WAITING_PIN 1;
+#define STATE_PROCESSING 2;
+#define STATE_TIMEOUT 3;
+#define TIMEOUT 8;
+
+var cardStatus = CARD_ABSENT;
+var pinStatus = PIN_NOT_ENTERED;
+var atmState = STATE_IDLE;
+var ejected = 0;
+
+ATM() = insert_card -> 
+        {cardStatus = CARD_INSERTED; atmState = STATE_WAITING_PIN;} ->
+        ((provide_pin -> 
+          {pinStatus = PIN_ENTERED; atmState = STATE_PROCESSING;} ->
+          process_transaction -> 
+          {atmState = STATE_IDLE; cardStatus = CARD_ABSENT; pinStatus = PIN_NOT_ENTERED;} -> ATM())
+         timeout[TIMEOUT]
+         (timeout_occurs -> 
+          {atmState = STATE_TIMEOUT; ejected = 1;} ->
+          eject_card -> 
+          {cardStatus = CARD_ABSENT; atmState = STATE_IDLE;} -> ATM()));
+
+User() = insert_card -> 
+         (provide_pin -> User()
+          []
+          Wait[10]; provide_pin -> User());
+
+atm_timeout = ATM || User;
+
+#define card_ejected (ejected == 1);
+#assert atm_timeout deadlockfree;

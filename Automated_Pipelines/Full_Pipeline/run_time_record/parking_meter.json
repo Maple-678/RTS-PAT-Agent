@@ -1,0 +1,81 @@
+{
+    "const-var-time": {
+        "runTime": 37.633442
+    },
+    "time-constraint-time": {
+        "runTime": 8.577160800000001
+    },
+    "action-time": {
+        "runTime": 15.711529600000006
+    },
+    "nl-annotation-time": {
+        "runTime": 9.844550600000005
+    },
+    "codegen-time_2026-06-03-14-16-27": {
+        "runTime": 48.83756070000004
+    },
+    "verification-time_2026-06-03-14-16-28": {
+        "runTime": 0.7882173000000421,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "codegen-time_2026-06-03-14-17-44": {
+        "runTime": 75.79944999999987
+    },
+    "codegen-time_2026-06-03-14-18-27": {
+        "runTime": 42.58697149999989
+    },
+    "verification-time_2026-06-03-14-18-28": {
+        "runTime": 1.4282705999999052,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "verification-time_2026-06-03-14-20-00": {
+        "runTime": 1.4802570000001651,
+        "hasMismatch": true,
+        "codegenFailed": false
+    },
+    "refine-time_2_2026-06-03-14-20-41": {
+        "runTime": 41.20036059999984
+    },
+    "verification-time_2026-06-03-14-20-42": {
+        "runTime": 0.8639705999999023,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "refine-time_2_2026-06-03-14-21-51": {
+        "runTime": 68.87324879999983
+    },
+    "verification-time_2026-06-03-14-21-52": {
+        "runTime": 0.703135500000144,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "refine-time_2_2026-06-03-14-23-09": {
+        "runTime": 76.92575190000002
+    },
+    "refine-time_3_2026-06-03-14-23-47": {
+        "runTime": 38.739691700000094
+    },
+    "verification-time_2026-06-03-14-23-48": {
+        "runTime": 0.8552543000000696,
+        "hasMismatch": true,
+        "codegenFailed": true
+    },
+    "refine-time_3_2026-06-03-14-24-56": {
+        "runTime": 67.72420969999985
+    },
+    "verification-time_2026-06-03-14-24-57": {
+        "runTime": 1.2468515999999,
+        "hasMismatch": false,
+        "codegenFailed": false
+    },
+    "codegen-time_2026-06-03-20-45-30": {
+        "runTime": 20.207385799999997
+    },
+    "verification-time_2026-06-03-20-45-31": {
+        "runTime": 1.2082245,
+        "hasMismatch": true,
+        "codegenFailed": false
+    }
+}

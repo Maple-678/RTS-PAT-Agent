@@ -1,0 +1,14 @@
+#define HEARTBEAT_INTERVAL 2;
+#define WAITING 0;
+#define ALARM 1;
+
+var monitorState = WAITING;
+
+Sender() = heartbeat -> Wait[HEARTBEAT_INTERVAL]; Sender();
+
+Monitor() = (heartbeat -> Monitor()) timeout[5] (alarm{monitorState = ALARM;} -> Monitor());
+
+System() = Sender() || Monitor();
+
+#define alarm_state (monitorState == ALARM);
+#assert System() deadlockfree;
