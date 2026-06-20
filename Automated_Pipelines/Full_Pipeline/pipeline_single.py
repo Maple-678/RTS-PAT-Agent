@@ -8,8 +8,8 @@ import tempfile
 def main():
     parser = argparse.ArgumentParser(description='Run one case from any dataset through pipeline.py')
     parser.add_argument('--model', required=True, help='modelName to run')
-    parser.add_argument('--dataset', default='../../Datasets/PAT.json',
-                        help='dataset JSON path (default: ../../Datasets/PAT.json)')
+    parser.add_argument('--dataset', default='../../Datasets/PAT-RT.json',
+                        help='dataset JSON path (default: ../../Datasets/PAT-RT.json)')
     args = parser.parse_args()
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
